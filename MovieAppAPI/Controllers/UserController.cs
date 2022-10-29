@@ -1,37 +1,53 @@
-using System.Security.Cryptography;
-using System.Text;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using MovieAppAPI.Entities;
+using MovieAppAPI.Models;
+using MovieAppAPI.Services;
+using SQLitePCL;
 
 namespace MovieAppAPI.Controllers;
 
 [Route("api/user")]
 [ApiController]
 public class UserController : ControllerBase {
-    [HttpGet]
-    public async Task<ActionResult<List<User>>> Get() {
-        var users = new List<User> {
-            new(
-                "Jjjjerker", ComputeSha256Hash("12345"),
-                "someMail@mail.com", gender: Gender.Male,
-                birthDate: new DateTime(2003, 8, 15)),
-            new(
-                "Mmmmmmasturbateress", ComputeSha256Hash("complexPassword124_2@"),
-                "anotherMail@mail.com", gender: Gender.Female,
-                birthDate: new DateTime(2001, 3, 11)
-            )
-        };
+    private readonly IUserService _userService;
 
-        return Ok(users);
+    public UserController(IUserService userService) {
+        _userService = userService;
     }
 
-    private static string ComputeSha256Hash(string rawString) {
-        var sha256 = SHA256.Create();
-        var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(rawString));
-        var builder = new StringBuilder(bytes.Length);
+    [HttpGet]
+    public IActionResult GetAll() {
+        return Ok(_userService.GetAll());
+    }
 
-        foreach (var b in bytes) builder.Append(b.ToString("X"));
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id) {
+        return Ok(await _userService.GetById(id));
+    }
 
-        return builder.ToString();
+    [HttpPost]
+    public async Task<IActionResult> CreateUser(UserCreateModel user) {
+        var result = await _userService.Create(user);
+        var message = result ? "User was successfully created" : "Something went wrong";
+        return Ok(message);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateUser(Guid id, UserUpdateModel user) {
+        var result = await _userService.Update(id, user);
+        var message = result ? "User was successfully updated" : "Something went wrong";
+        return Ok(message);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteUser(Guid id) {
+        await _userService.Delete(id);
+        return Ok("User was deleted");
+    }
+    
+    [HttpDelete]
+    public async Task<IActionResult> DeleteUser([FromQuery(Name = "email")] string email) {
+        await _userService.Delete(email);
+        return Ok("User was deleted");
     }
 }

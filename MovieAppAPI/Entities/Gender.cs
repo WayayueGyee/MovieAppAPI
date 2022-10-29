@@ -1,4 +1,4 @@
-namespace MovieAppAPI.Entities; 
+namespace MovieAppAPI.Entities;
 
 public enum Gender {
     Male,
