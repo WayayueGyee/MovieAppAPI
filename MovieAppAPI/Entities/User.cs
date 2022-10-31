@@ -13,7 +13,7 @@ public class User {
     [Required] public string Name { get; set; }
     [Required] public string UserName { get; set; }
     [JsonIgnore] [Required] public string PasswordHash { get; set; }
-    [Required] public string Email { get; set; }
+    [Required] [EmailAddress] public string Email { get; set; }
     public DateTime BirthDate { get; set; }
     public Gender Gender { get; set; }
 

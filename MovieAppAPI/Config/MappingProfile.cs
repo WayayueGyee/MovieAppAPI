@@ -1,13 +1,22 @@
 using AutoMapper;
 using MovieAppAPI.Entities;
-using MovieAppAPI.Models;
+using MovieAppAPI.Models.Auth;
+using MovieAppAPI.Models.User;
 
 namespace MovieAppAPI.Config;
 
 public class MappingProfile : Profile {
     public MappingProfile() {
-        CreateMap<User, UserCreateModel>().ReverseMap().IgnoreNullProperties();
-        CreateMap<User, UserUpdateModel>().ReverseMap().IgnoreNullProperties();
+        CreateMap<User, UserCreateModel>()
+            // .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate))
+            .ReverseMap()
+            .IgnoreNullProperties();
+        CreateMap<User, UserUpdateModel>()
+            .ReverseMap()
+            .ForMember(dest => dest.BirthDate, opt => opt.Condition((src, dest) => src.BirthDate != null))
+            .IgnoreNullProperties();
+
+        CreateMap<UserRegisterModel, UserCreateModel>(); 
     }
 }
 

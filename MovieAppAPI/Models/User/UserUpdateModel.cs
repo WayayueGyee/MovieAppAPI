@@ -1,21 +1,20 @@
 using System.ComponentModel.DataAnnotations;
 using MovieAppAPI.Entities;
 
-namespace MovieAppAPI.Models; 
+namespace MovieAppAPI.Models.User;
 
 public class UserUpdateModel {
-    public UserUpdateModel(string? userName, string? email, string? password, DateTime? birthDate, string? gender) {
+    public UserUpdateModel(string? userName, string? email, string? password, DateTime? birthDate, Gender? gender) {
         UserName = userName;
         Email = email;
         Password = password;
         BirthDate = birthDate;
-        Gender = gender;    
+        Gender = gender;
     }
 
     public string? UserName { get; set; }
-    public string? Email { get; set; }
+    [EmailAddress] public string? Email { get; set; }
     public string? Password { get; set; }
     public DateTime? BirthDate { get; set; }
-    [EnumDataType(typeof(Gender))]
-    public string? Gender { get; set; }
+    [EnumDataType(typeof(Gender))] public Gender? Gender { get; set; }
 }

@@ -1,10 +1,14 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MovieAppAPI.Config;
 using MovieAppAPI.Data;
 using MovieAppAPI.Middlewares;
 using MovieAppAPI.Services;
+using MovieAppAPI.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -17,18 +21,40 @@ services.AddDbContext<MovieDataContext>(options =>
 services.AddControllers().AddJsonOptions(options => {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
 // Configure AutoMapper
 // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-var config = new MapperConfiguration(cfg => {
-    cfg.AddProfile<MappingProfile>();
-});
+var config = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
 var mapper = config.CreateMapper();
 services.AddSingleton(mapper);
 
+// Configure authentication
+services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
+    var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
+    if (isDevelopment) {
+        options.RequireHttpsMetadata = false;
+    }
+
+    options.TokenValidationParameters = new TokenValidationParameters {
+        ValidateIssuer = true,
+        ValidIssuer = TokenConfig.Issuer,
+
+        ValidateAudience = true,
+        ValidAudience = TokenConfig.Audience,
+
+        ValidateLifetime = true,
+
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = TokenConfig.GetSymmetricSecurityKey(),
+    };
+});
+
 // Configure DI
 services.AddScoped<IUserService, UserService>();
+services.AddScoped<IAuthService, AuthService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
@@ -45,6 +71,8 @@ if (app.Environment.IsDevelopment()) {
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseAuthentication();
+
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.MapControllers();
 

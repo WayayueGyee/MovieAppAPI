@@ -1,12 +1,11 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using MovieAppAPI.Models;
+using MovieAppAPI.Models.User;
 using MovieAppAPI.Services;
-using SQLitePCL;
 
 namespace MovieAppAPI.Controllers;
 
 [Route("api/user")]
+[Produces("application/json")]
 [ApiController]
 public class UserController : ControllerBase {
     private readonly IUserService _userService;
