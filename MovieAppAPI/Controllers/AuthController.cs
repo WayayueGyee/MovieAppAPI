@@ -5,7 +5,7 @@ using MovieAppAPI.Services;
 
 namespace MovieAppAPI.Controllers;
 
-[Route("api/account")]
+[Route("api/account/")]
 [Produces("application/json")]
 [ApiController]
 public class AuthController : ControllerBase {
@@ -15,7 +15,7 @@ public class AuthController : ControllerBase {
         _authService = authService;
     }
 
-    [HttpPost("~/register")]
+    [HttpPost("register")]
     public async Task<IActionResult> Register(UserRegisterModel registerModel) {
         // TODO: ask if there is way not to use the response functions
         try {
@@ -34,7 +34,7 @@ public class AuthController : ControllerBase {
         }
     }
 
-    [HttpPost("~/login")]
+    [HttpPost("login")]
     public IActionResult Login(UserLoginModel loginModel) {
         try {
             var token = _authService.Login(loginModel);
@@ -50,5 +50,11 @@ public class AuthController : ControllerBase {
         catch (RecordNotFoundException e) {
             return NotFound(e.Message);
         }
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(UserLogoutModel logoutModel) {
+        var isLogout = await _authService.Logout(logoutModel);
+        return isLogout ? Ok() : BadRequest();
     }
 }

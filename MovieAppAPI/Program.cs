@@ -8,7 +8,6 @@ using MovieAppAPI.Config;
 using MovieAppAPI.Data;
 using MovieAppAPI.Middlewares;
 using MovieAppAPI.Services;
-using MovieAppAPI.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -55,6 +54,7 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
 // Configure DI
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<IAuthService, AuthService>();
+services.AddScoped<ITokenService, TokenService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();

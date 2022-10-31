@@ -1,9 +1,6 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using AutoMapper;
-using Microsoft.IdentityModel.Tokens;
-using MovieAppAPI.Config;
 using MovieAppAPI.Data;
+using MovieAppAPI.Entities.Auth;
 using MovieAppAPI.Helpers;
 using MovieAppAPI.Models.Auth;
 using MovieAppAPI.Models.User;
@@ -13,18 +10,21 @@ namespace MovieAppAPI.Services;
 
 public interface IAuthService {
     Task<string> Register(UserRegisterModel registerModel);
-    string Login(UserLoginModel loginModel);
+    Task<string> Login(UserLoginModel loginModel);
+    Task<bool> Logout(UserLogoutModel logoutModel);
 }
 
 public class AuthService : IAuthService {
     private readonly IUserService _userService;
-    private MovieDataContext _context;
+    private readonly ITokenService _tokenService;
+    private readonly MovieDataContext _context;
     private readonly IMapper _mapper;
 
-    public AuthService(IUserService userService, MovieDataContext context, IMapper mapper) {
+    public AuthService(IUserService userService, MovieDataContext context, IMapper mapper, ITokenService tokenService) {
         _userService = userService;
         _context = context;
         _mapper = mapper;
+        _tokenService = tokenService;
     }
 
     // TODO: ask when to use exceptions 
@@ -38,50 +38,29 @@ public class AuthService : IAuthService {
         var createModel = _mapper.Map<UserCreateModel>(registerModel);
         // TODO: is it worth to await here???
         await _userService.Create(createModel);
-        var token = GenerateToken(registerModel.Email);
+        var token = _tokenService.GenerateToken(registerModel.Email);
+        await _tokenService.SaveToken(token);
 
         return token;
     }
 
-    public string Login(UserLoginModel loginModel) {
+    public async Task<string> Login(UserLoginModel loginModel) {
         var user = _userService.GetByUserName(loginModel.UserName);
 
         if (Hashing.ComputeSha256Hash(loginModel.Password) != user.PasswordHash) {
             throw ExceptionHelper.PasswordsDoNotMatch();
         }
 
-        var token = GenerateToken(user.Email);
+        var token = _tokenService.GenerateToken(user.Email);
+        await _tokenService.SaveToken(token);
 
         return token;
     }
 
-    private string GenerateToken(string email) {
-        var claimsIdentity = GetIdentity(email);
+    public async Task<bool> Logout(UserLogoutModel logoutModel) {
+        var token = _mapper.Map<ValidToken>(logoutModel);
+        var result = await _tokenService.Delete(token);
 
-        var now = DateTime.UtcNow;
-        var jwt = new JwtSecurityToken(
-            issuer: TokenConfig.Issuer,
-            audience: TokenConfig.Audience,
-            notBefore: now,
-            claims: claimsIdentity.Claims,
-            expires: now.Add(TimeSpan.FromMinutes(TokenConfig.Lifetime)),
-            signingCredentials: new SigningCredentials(TokenConfig.GetSymmetricSecurityKey(),
-                SecurityAlgorithms.HmacSha256));
-        var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-        return encodedJwt;
-    }
-
-    private ClaimsIdentity GetIdentity(string email) {
-        var user = _userService.GetByEmail(email);
-        Console.WriteLine(user.Email);
-
-        var claims = new List<Claim> {
-            new(ClaimsIdentity.DefaultNameClaimType, user.Email)
-        };
-        var claimsIdentity = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-            ClaimsIdentity.DefaultRoleClaimType);
-
-        return claimsIdentity;
+        return result;
     }
 }

@@ -22,6 +22,16 @@ namespace MovieAppAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("MovieAppAPI.Entities.Auth.ValidToken", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
+
+                    b.HasKey("Token");
+
+                    b.ToTable("valid_token");
+                });
+
             modelBuilder.Entity("MovieAppAPI.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
