@@ -9,5 +9,5 @@ public class InvalidToken {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    public string Token { get; set; }
+    [Required] public string Token { get; set; }
 }

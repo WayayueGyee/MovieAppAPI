@@ -14,9 +14,9 @@ public class User {
     [Required] public string Name { get; set; }
     [Required] public string UserName { get; set; }
     [JsonIgnore] [Required] public string PasswordHash { get; set; }
-    [Required] [EmailAddress] public string Email { get; set; }
-    public DateTime BirthDate { get; set; }
-    public Gender Gender { get; set; }
+    [EmailAddress] [Required] public string Email { get; set; }
+    public DateTime? BirthDate { get; set; }
+    public Gender? Gender { get; set; }
 
     public User(string userName, string passwordHash, string email, DateTime birthDate, Gender gender, string name) {
         Id = Guid.NewGuid();

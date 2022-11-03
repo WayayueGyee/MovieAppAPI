@@ -1,13 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MovieAppAPI.Entities;
 
+[Table("country")]
 public class Country {
-    public Country(Guid id, string countryName) {
-        Id = id;
-        CountryName = countryName;
-    }
-
     [Key] public Guid Id { get; set; }
     public string CountryName { get; set; }
 }
