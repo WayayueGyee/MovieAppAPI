@@ -59,8 +59,17 @@ public class AuthController : ControllerBase {
     [HttpPost("logout")]
     [Authorize("TokenNotRejected")]
     public async Task<IActionResult> Logout() {
-        var token = Request.Headers.Authorization.ToString().Split(" ")[1];
-        var isLogout = await _authService.Logout(token);
-        return isLogout ? Ok() : BadRequest();
+        var token = AuthService.TokenFromHeader(Request.Headers);
+        if (token is null) {
+            return Unauthorized();
+        }
+
+        try {
+            await _authService.Logout(token);
+            return Ok();
+        }
+        catch (Exception e) {
+            return BadRequest(e.Message);
+        }
     }
 }

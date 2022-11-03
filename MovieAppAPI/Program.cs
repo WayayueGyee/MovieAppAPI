@@ -4,11 +4,9 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using MovieAppAPI.Config;
 using MovieAppAPI.Data;
 using MovieAppAPI.Middlewares;
-using MovieAppAPI.Services;
 using MovieAppAPI.Services.Auth;
 using MovieAppAPI.Services.Users;
 
@@ -47,7 +45,12 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
 services.AddAuthorization()
     .AddScoped<IAuthorizationHandler, TokenNotRejectedAuthorizationHandler>()
     .AddAuthorization(options => {
-        options.AddPolicy("TokenNotRejected", policyBuilder => policyBuilder.AddRequirements(new TokenNotRejectedRequirement()));
+        options.AddPolicy("TokenNotRejected",
+            policyBuilder =>
+                policyBuilder
+                    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .AddRequirements(new TokenNotRejectedRequirement()));
     });
 
 // Configure DI
@@ -69,8 +72,8 @@ if (app.Environment.IsDevelopment()) {
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.MapControllers();

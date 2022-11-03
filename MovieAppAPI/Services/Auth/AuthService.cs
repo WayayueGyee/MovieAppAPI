@@ -36,7 +36,7 @@ public class AuthService : IAuthService {
 
         return token;
     }
-    
+
     /// <exception cref="ObjectsAreNotEqual"></exception>
     public Task<string> Login(UserLoginModel loginModel) {
         var user = _userService.GetByUserName(loginModel.UserName);
@@ -50,11 +50,24 @@ public class AuthService : IAuthService {
         return Task.FromResult(token);
     }
 
-    public async Task<bool> Logout(string stringToken) {
-        var token = new InvalidToken {Token = stringToken};
-        var result = await _tokenService.Delete(token);
+    public async Task Logout(string stringToken) {
+        var token = new InvalidToken { Token = stringToken };
         await _tokenService.SaveToken(token.Token);
-        
-        return result;
+    }
+
+    public static string? TokenFromHeader(IHeaderDictionary headers) {
+        if (!headers.ContainsKey("Authorization")) return null;
+
+        string authHeader = headers.Authorization;
+
+        if (string.IsNullOrEmpty(authHeader)) return null;
+
+        const string authType = "bearer";
+
+        if (!authHeader.StartsWith(authType, StringComparison.OrdinalIgnoreCase)) return null;
+
+        var token = authHeader[authType.Length..];
+
+        return string.IsNullOrEmpty(token) ? null : token;
     }
 }

@@ -45,7 +45,7 @@ public class UserController : ControllerBase {
         await _userService.Delete(id);
         return Ok("User was deleted");
     }
-    
+
     [HttpDelete]
     public async Task<IActionResult> DeleteUser([FromQuery(Name = "email")] string email) {
         await _userService.Delete(email);
