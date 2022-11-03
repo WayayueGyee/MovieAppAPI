@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using MovieAppAPI.Entities;
+using MovieAppAPI.Entities.Users;
 
-namespace MovieAppAPI.Models.User;
+namespace MovieAppAPI.Models.Users;
 
 public class UserCreateModel {
     private const byte MinPasswordLength = 6;

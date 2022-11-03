@@ -1,8 +1,9 @@
 using AutoMapper;
 using MovieAppAPI.Entities;
 using MovieAppAPI.Entities.Auth;
+using MovieAppAPI.Entities.Users;
 using MovieAppAPI.Models.Auth;
-using MovieAppAPI.Models.User;
+using MovieAppAPI.Models.Users;
 using NuGet.Common;
 
 namespace MovieAppAPI.Config;
@@ -19,7 +20,7 @@ public class MappingProfile : Profile {
             .IgnoreNullProperties();
 
         CreateMap<UserRegisterModel, UserCreateModel>();
-        CreateMap<UserLogoutModel, ValidToken>();
+        CreateMap<UserLogoutModel, InvalidToken>();
     }
 }
 

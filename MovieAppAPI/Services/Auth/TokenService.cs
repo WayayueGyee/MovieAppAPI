@@ -4,15 +4,9 @@ using Microsoft.IdentityModel.Tokens;
 using MovieAppAPI.Config;
 using MovieAppAPI.Data;
 using MovieAppAPI.Entities.Auth;
+using MovieAppAPI.Services.Users;
 
-namespace MovieAppAPI.Services;
-
-public interface ITokenService {
-    string GenerateToken(string email);
-    Task<bool> IsTokenValid(string token);
-    Task<bool> SaveToken(string token);
-    Task<bool> Delete(ValidToken token);
-}
+namespace MovieAppAPI.Services.Auth;
 
 public class TokenService : ITokenService {
     private readonly MovieDataContext _context;
@@ -22,28 +16,36 @@ public class TokenService : ITokenService {
         _context = context;
         _userService = userService;
     }
-    
+
     public async Task<bool> SaveToken(string token) {
-        var tokenModel = new ValidToken { Token = token };
+        var tokenModel = new InvalidToken { Token = token };
         _context.ValidTokens.Add(tokenModel);
         var result = await _context.SaveChangesAsync();
 
         return result > 0;
     }
-    
-    public async Task<bool> IsTokenValid(string token) {
-        var dbToken = await _context.ValidTokens.FindAsync(token);
 
-        return dbToken is not null;
+    public Task<bool> IsTokenValid(string stringToken) {
+        var dbToken = _context.ValidTokens.FirstOrDefault(token => token.Token == stringToken);
+        if (dbToken is null) {
+            return Task.FromResult(true);
+        }
+        
+        var jwt = new JwtSecurityToken(dbToken.Token);
+        return Task.FromResult(!IsTokenExpired(jwt));
     }
 
-    public async Task<bool> Delete(ValidToken token) {
+    private static bool IsTokenExpired(JwtSecurityToken jwt) {
+        return DateTime.Now > jwt.ValidTo;
+    }
+
+    public async Task<bool> Delete(InvalidToken token) {
         _context.ValidTokens.Remove(token);
         var result = await _context.SaveChangesAsync();
 
         return result > 0;
     }
-    
+
     public string GenerateToken(string email) {
         var claimsIdentity = GetIdentity(email);
 

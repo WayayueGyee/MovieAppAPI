@@ -1,12 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MovieAppAPI.Models.User;
-using MovieAppAPI.Services;
+using MovieAppAPI.Models.Users;
+using MovieAppAPI.Services.Users;
 
 namespace MovieAppAPI.Controllers;
 
 [Route("api/user")]
 [Produces("application/json")]
 [ApiController]
+[Authorize("TokenNotRejected")]
 public class UserController : ControllerBase {
     private readonly IUserService _userService;
 
@@ -19,7 +21,7 @@ public class UserController : ControllerBase {
         return Ok(_userService.GetAll());
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id) {
         return Ok(await _userService.GetById(id));
     }

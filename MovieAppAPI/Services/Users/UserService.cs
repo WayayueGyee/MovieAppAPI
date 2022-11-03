@@ -1,28 +1,12 @@
-using System.Security.Cryptography;
-using System.Text;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Data;
-using MovieAppAPI.Entities;
+using MovieAppAPI.Entities.Users;
 using MovieAppAPI.Helpers;
-using MovieAppAPI.Models;
-using MovieAppAPI.Models.User;
+using MovieAppAPI.Models.Users;
 using MovieAppAPI.Utils;
 
-namespace MovieAppAPI.Services;
-
-public interface IUserService {
-    IEnumerable<User> GetAll();
-    Task<User> GetById(Guid id);
-    User GetByEmail(string email);
-    User GetByUserName(string userName);
-    Task<bool> Create(UserCreateModel user);
-    Task<bool> Update(Guid id, UserUpdateModel user);
-    Task Delete(Guid id);
-    Task Delete(string email);
-    Task<bool> IsUserExists(Guid id);
-    Task<bool> IsUserExists(string email);
-}
+namespace MovieAppAPI.Services.Users;
 
 public class UserService : IUserService {
     private readonly MovieDataContext _context;
@@ -108,8 +92,10 @@ public class UserService : IUserService {
         newUser.PasswordHash = Hashing.ComputeSha256Hash(user.Password);
 
         _context.Users.Add(newUser);
+        // Remake
         var result = await _context.SaveChangesAsync();
         return result > 0;
+        
     }
 
     public async Task<bool> Update(Guid id, UserUpdateModel user) {

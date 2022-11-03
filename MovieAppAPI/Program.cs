@@ -2,12 +2,15 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MovieAppAPI.Config;
 using MovieAppAPI.Data;
 using MovieAppAPI.Middlewares;
 using MovieAppAPI.Services;
+using MovieAppAPI.Services.Auth;
+using MovieAppAPI.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -23,13 +26,13 @@ services.AddControllers().AddJsonOptions(options => {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
-// Configure AutoMapper
+// AutoMapper
 // services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 var config = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
 var mapper = config.CreateMapper();
 services.AddSingleton(mapper);
 
-// Configure authentication
+// Authentication
 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
     var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 
@@ -37,19 +40,15 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
         options.RequireHttpsMetadata = false;
     }
 
-    options.TokenValidationParameters = new TokenValidationParameters {
-        ValidateIssuer = true,
-        ValidIssuer = TokenConfig.Issuer,
-
-        ValidateAudience = true,
-        ValidAudience = TokenConfig.Audience,
-
-        ValidateLifetime = true,
-
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = TokenConfig.GetSymmetricSecurityKey(),
-    };
+    options.TokenValidationParameters = TokenConfig.CreateValidationParameters();
 });
+
+// Authorization
+services.AddAuthorization()
+    .AddScoped<IAuthorizationHandler, TokenNotRejectedAuthorizationHandler>()
+    .AddAuthorization(options => {
+        options.AddPolicy("TokenNotRejected", policyBuilder => policyBuilder.AddRequirements(new TokenNotRejectedRequirement()));
+    });
 
 // Configure DI
 services.AddScoped<IUserService, UserService>();

@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MovieAppAPI.Exceptions;
 using MovieAppAPI.Models.Auth;
 using MovieAppAPI.Services;
+using MovieAppAPI.Services.Auth;
 
 namespace MovieAppAPI.Controllers;
 
@@ -21,7 +23,8 @@ public class AuthController : ControllerBase {
         try {
             var token = await _authService.Register(registerModel);
             var response = new { token = token };
-            return Created(Request.Path.Value ?? "", response);
+            return new JsonResult(response);
+            // return Created(Request.Path.Value ?? "", response);
         }
         catch (ObjectsAreNotEqual e) {
             return Unauthorized(e.Message);
@@ -39,7 +42,8 @@ public class AuthController : ControllerBase {
         try {
             var token = _authService.Login(loginModel);
             var response = new { token = token };
-            return Created(Request.Path.Value ?? "", response);
+            return new JsonResult(response);
+            // return Created(Request.Path.Value ?? "", response);
         }
         catch (ObjectsAreNotEqual e) {
             return Unauthorized(e.Message);
@@ -53,8 +57,10 @@ public class AuthController : ControllerBase {
     }
 
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout(UserLogoutModel logoutModel) {
-        var isLogout = await _authService.Logout(logoutModel);
+    [Authorize("TokenNotRejected")]
+    public async Task<IActionResult> Logout() {
+        var token = Request.Headers.Authorization.ToString().Split(" ")[1];
+        var isLogout = await _authService.Logout(token);
         return isLogout ? Ok() : BadRequest();
     }
 }

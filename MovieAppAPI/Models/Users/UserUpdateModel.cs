@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using MovieAppAPI.Entities;
+using MovieAppAPI.Entities.Users;
 
-namespace MovieAppAPI.Models.User;
+namespace MovieAppAPI.Models.Users;
 
 public class UserUpdateModel {
     public UserUpdateModel(string? userName, string? email, string? password, DateTime? birthDate, Gender? gender) {

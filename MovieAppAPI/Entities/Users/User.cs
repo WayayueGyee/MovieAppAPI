@@ -3,8 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
-namespace MovieAppAPI.Entities;
+namespace MovieAppAPI.Entities.Users;
 
+// Add Avatar attribute
 [Table("user")]
 [Index(nameof(Email), IsUnique = true)]
 [Index(nameof(UserName), IsUnique = true)]

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using MovieAppAPI.Entities;
+using MovieAppAPI.Entities.Users;
 
 namespace MovieAppAPI.Models.Auth;
 
