@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using MovieAppAPI.Entities.Users;
 
 namespace MovieAppAPI.Models.Users;
 
 public class UserCreateModel {
     private const byte MinPasswordLength = 6;
-    
+
     public UserCreateModel(string userName, string name, string password, string email, DateTime birthDate,
         Gender gender) {
         UserName = userName;
@@ -27,4 +28,9 @@ public class UserCreateModel {
     public DateTime BirthDate { get; set; }
 
     [EnumDataType(typeof(Gender))] public Gender Gender { get; set; }
+
+    public override string ToString() {
+        return $"UserName: {UserName},\n" + $"Email: {Email},\n" + $"Name: {Name},\n" +
+               $"BirthDate: {BirthDate.ToString(CultureInfo.CurrentCulture)},\n" + $"Gender: {Gender.ToString()}";
+    }
 }

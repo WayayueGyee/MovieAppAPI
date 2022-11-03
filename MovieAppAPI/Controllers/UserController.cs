@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MovieAppAPI.Exceptions;
 using MovieAppAPI.Models.Users;
 using MovieAppAPI.Services.Users;
 
@@ -11,9 +13,11 @@ namespace MovieAppAPI.Controllers;
 [Authorize("TokenNotRejected")]
 public class UserController : ControllerBase {
     private readonly IUserService _userService;
+    private readonly ILogger<UserController> _logger;
 
-    public UserController(IUserService userService) {
+    public UserController(IUserService userService, ILogger<UserController> logger) {
         _userService = userService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -28,27 +32,60 @@ public class UserController : ControllerBase {
 
     [HttpPost]
     public async Task<IActionResult> CreateUser(UserCreateModel user) {
-        var result = await _userService.Create(user);
-        var message = result ? "User was successfully created" : "Something went wrong";
-        return Ok(message);
+        try {
+            await _userService.Create(user);
+            _logger.LogInformation("Create method executed. User: \n{@User} \ncreated", user);
+            return Ok("User was successfully created");
+        }
+        catch (AlreadyExistsException e) {
+            _logger.LogInformation("{E}", e.StackTrace);
+            return NotFound(e.Message);
+        }
+        catch (DbUpdateException e) {
+            _logger.LogInformation("{E}", e.StackTrace);
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
     }
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateUser(Guid id, UserUpdateModel user) {
-        var result = await _userService.Update(id, user);
-        var message = result ? "User was successfully updated" : "Something went wrong";
-        return Ok(message);
+        try {
+            await _userService.Update(id, user);
+            return Ok("User was successfully updated");
+        }
+        catch (RecordNotFoundException e) {
+            return NotFound(e.Message);
+        }
+        catch (DbUpdateException e) {
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteUser(Guid id) {
-        await _userService.Delete(id);
-        return Ok("User was deleted");
+        try {
+            await _userService.Delete(id);
+            return Ok("User was deleted");
+        }
+        catch (RecordNotFoundException e) {
+            return NotFound(e.Message);
+        }
+        catch (DbUpdateException e) {
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
     }
 
     [HttpDelete]
     public async Task<IActionResult> DeleteUser([FromQuery(Name = "email")] string email) {
-        await _userService.Delete(email);
-        return Ok("User was deleted");
+        try {
+            await _userService.Delete(email);
+            return Ok("User was deleted");
+        }
+        catch (RecordNotFoundException e) {
+            return NotFound(e.Message);
+        }
+        catch (DbUpdateException e) {
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
     }
 }

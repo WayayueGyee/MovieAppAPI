@@ -50,41 +50,25 @@ public class UserService : IUserService {
         return _context.Users;
     }
 
-    public async Task<User> GetById(Guid id) {
+    public async Task<User?> GetById(Guid id) {
         var user = await _context.Users.FindAsync(id);
-
-        // TODO: find out if it's worth throwing out exception in get operations
-        if (user is null) {
-            throw ExceptionHelper.UserNotFoundException(id.ToString());
-        }
-
         return user;
     }
 
     public User GetByEmail(string email) {
         var user = _context.Users.Where(u => u.Email == email).ToList()[0];
-
-        if (user is null) {
-            throw ExceptionHelper.UserNotFoundException(email: email);
-        }
-
         return user;
     }
 
     public User GetByUserName(string userName) {
         var user = _context.Users.Where(u => u.Email == userName).ToList()[0];
-
-        if (user is null) {
-            throw ExceptionHelper.UserNotFoundException(userName: userName);
-        }
-
         return user;
     }
 
-    public async Task<bool> Create(UserCreateModel user) {
+    public async Task Create(UserCreateModel user) {
         var isExists = await IsUserExists(user);
         if (isExists) {
-            throw ExceptionHelper.UserAlreadyExistsException();
+            throw ExceptionHelper.UserAlreadyExistsException(user.Email, user.UserName);
         }
 
         var newUser = _mapper.Map<User>(user);
@@ -93,12 +77,10 @@ public class UserService : IUserService {
 
         _context.Users.Add(newUser);
         // Remake
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
-        
+        await _context.SaveChangesAsync();
     }
 
-    public async Task<bool> Update(Guid id, UserUpdateModel user) {
+    public async Task Update(Guid id, UserUpdateModel user) {
         var dbUser = await _context.Users.FindAsync(id);
 
         if (dbUser is null) {
@@ -115,17 +97,15 @@ public class UserService : IUserService {
 
         _context.Users.Update(newUser);
 
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        await _context.SaveChangesAsync();
     }
 
     public async Task Delete(Guid id) {
         var isExists = await IsUserExists(id);
         if (!isExists) {
-            throw ExceptionHelper.UserNotFoundException(id.ToString());
+            throw ExceptionHelper.UserNotFoundException(id: id.ToString());
         }
 
-        // _context.Users.FromSqlInterpolated($"DELETE FROM \"user\" WHERE \"Id\"='{id.ToString()}'");
         var user = new User(id);
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
@@ -134,12 +114,12 @@ public class UserService : IUserService {
     public async Task Delete(string email) {
         var isExists = await IsUserExists(email);
         if (!isExists) {
-            throw ExceptionHelper.UserNotFoundException(email);
+            throw ExceptionHelper.UserNotFoundException(email: email);
         }
 
         // _context.Users.FromSqlInterpolated($"DELETE FROM \"user\" WHERE \"Email\"='{email}'");
-        var user = new User { Email = email };
-        _context.Users.Remove(user);
+        var user = _context.Users.SingleOrDefault(user => user.Email == email);
+        _context.Users.Remove(user!);
         await _context.SaveChangesAsync();
     }
 }
