@@ -5,7 +5,7 @@ using MovieAppAPI.Entities;
 
 namespace MovieAppAPI.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/review")]
 [ApiController]
 public class ReviewController : ControllerBase {
     private readonly MovieDataContext _context;

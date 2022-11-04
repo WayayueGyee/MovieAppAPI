@@ -1,5 +1,5 @@
 namespace MovieAppAPI.Models.Reviews; 
 
-public class CreateReviewModel {
+public class ReviewCreateResponseModel {
     
 }

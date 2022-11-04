@@ -3,6 +3,7 @@ using MovieAppAPI.Entities;
 using MovieAppAPI.Entities.Auth;
 using MovieAppAPI.Entities.Users;
 using MovieAppAPI.Models.Auth;
+using MovieAppAPI.Models.Countries;
 using MovieAppAPI.Models.Movies;
 using MovieAppAPI.Models.Users;
 using NuGet.Common;
@@ -26,9 +27,13 @@ public class MappingProfile : Profile {
         CreateMap<UserLogoutModel, InvalidToken>();
 
         // Movies
-        CreateMap<CreateMovieModel, Movie>();
-        CreateMap<UpdateMovieModel, Movie>().IgnoreNullProperties();
-        CreateMap<Movie, CreateMovieResponseModel>();
+        CreateMap<MovieCreateModel, Movie>();
+        CreateMap<MovieUpdateModel, Movie>().IgnoreNullProperties();
+        CreateMap<Movie, MovieCreateResponseModel>();
+        
+        // Countries
+        CreateMap<CountryCreateModel, Country>();
+        CreateMap<CountryUpdateModel, Country>();
     }
 }
 

@@ -2,8 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MovieAppAPI.Models.Movies;
 
-public class CreateMovieModel {
-    public CreateMovieModel(string? name, string? poster, int year, TimeSpan time, string? tagline, string? description,
+public class MovieCreateModel {
+    public MovieCreateModel(string? name, string? poster, int year, TimeSpan time, string? tagline, string? description,
         string? director, int? budget, int? fees, int ageLimit, string? countryName) {
         Name = name;
         Poster = poster;

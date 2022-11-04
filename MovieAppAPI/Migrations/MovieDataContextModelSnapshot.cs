@@ -157,9 +157,10 @@ namespace MovieAppAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MovieId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("MovieId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("review");
                 });

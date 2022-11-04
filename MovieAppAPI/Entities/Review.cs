@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Entities.Users;
 
 namespace MovieAppAPI.Entities;
 
 [Table("review")]
+[Index("MovieId", "UserId", IsUnique = true)]
 public class Review {
     [Key] public Guid Id { get; set; }
     [Required] public int Rating { get; set; }

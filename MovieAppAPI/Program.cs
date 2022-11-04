@@ -10,6 +10,7 @@ using MovieAppAPI.Config;
 using MovieAppAPI.Data;
 using MovieAppAPI.Middlewares;
 using MovieAppAPI.Services.Auth;
+using MovieAppAPI.Services.Countries;
 using MovieAppAPI.Services.Movies;
 using MovieAppAPI.Services.Users;
 
@@ -61,6 +62,7 @@ services.AddScoped<IUserService, UserService>();
 services.AddScoped<IAuthService, AuthService>();
 services.AddScoped<ITokenService, TokenService>();
 services.AddScoped<IMovieService, MovieService>();
+services.AddScoped<ICountryService, CountryService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();

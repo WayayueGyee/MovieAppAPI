@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Data;
 using MovieAppAPI.Entities;
+using MovieAppAPI.Exceptions;
 using MovieAppAPI.Helpers;
 using MovieAppAPI.Models.Movies;
 using MovieAppAPI.Services.Users;
@@ -21,10 +22,6 @@ public class MovieService : IMovieService {
     }
 
     public async Task<IEnumerable<Movie>?> GetAll() {
-        if (_context.Movies is null) {
-            return null;
-        }
-        
         return await _context.Movies.ToListAsync();
     }
 
@@ -41,17 +38,18 @@ public class MovieService : IMovieService {
         return await _context.Movies.AnyAsync(movie => movie.Id == id);
     }
     
-    public async Task<CreateMovieResponseModel> Create(CreateMovieModel createMovieModel) {
-        var newMovie = _mapper.Map<Movie>(createMovieModel);
+    public async Task<MovieCreateResponseModel> Create(MovieCreateModel movieCreateModel) {
+        var newMovie = _mapper.Map<Movie>(movieCreateModel);
         // TODO: add countryId by country name
         _context.Movies.Add(newMovie);
         await _context.SaveChangesAsync();
 
-        var response = _mapper.Map<CreateMovieResponseModel>(newMovie);
+        var response = _mapper.Map<MovieCreateResponseModel>(newMovie);
         return response;
     }
-
-    public async Task Update(Guid id, UpdateMovieModel updateMovieModel) {
+    
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task Update(Guid id, MovieUpdateModel movieUpdateModel) {
         var dbMovie = await _context.Movies.FindAsync(id);
 
         if (dbMovie is null) {
@@ -60,16 +58,17 @@ public class MovieService : IMovieService {
 
         // TODO: ask why it's works like that
         var oldTime = dbMovie.Time;
-        var updateMovie = _mapper.Map(updateMovieModel, dbMovie);
+        var updatedMovie = _mapper.Map(movieUpdateModel, dbMovie);
 
-        if (updateMovieModel.Time is null) {
-            updateMovie.Time = oldTime;
+        if (movieUpdateModel.Time is null) {
+            updatedMovie.Time = oldTime;
         }
         
-        _context.Update(updateMovie);
+        _context.Update(updatedMovie);
         await _context.SaveChangesAsync();
     }
 
+    /// <exception cref="RecordNotFoundException"></exception>
     public async Task Delete(Guid id) {
         var isExists = await IsMovieExists(id);
         if (!isExists) {
