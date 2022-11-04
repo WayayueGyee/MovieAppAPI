@@ -15,9 +15,7 @@ public class Review {
     [Required] public Guid MovieId { get; set; }
     [ForeignKey("MovieId")] public Movie Movie { get; set; }
 
-    [Required]
-    [Column("Author")]
-    public Guid UserId { get; set; }
+    [Required] [Column("Author")] public Guid UserId { get; set; }
 
     [ForeignKey("UserId")] public User Author { get; set; }
 }

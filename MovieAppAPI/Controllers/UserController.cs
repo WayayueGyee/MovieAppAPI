@@ -27,7 +27,12 @@ public class UserController : ControllerBase {
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id) {
-        return Ok(await _userService.GetById(id));
+        var user = await _userService.GetById(id);
+        if (user is null) {
+            return NotFound($"User with id \"{id.ToString()}\" not found");
+        }
+        
+        return Ok(user);
     }
 
     [HttpPost]

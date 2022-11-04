@@ -30,6 +30,14 @@ public static class ExceptionHelper {
         return new AlreadyExistsException($"User with email \"{email}\" already exists");
     }
 
+    public static AlreadyExistsException MovieAlreadyExistsException(string id) {
+        return new AlreadyExistsException($"Movie with id \"{id}\" is already exists");
+    }
+
+    public static RecordNotFoundException MovieNotFoundException(string id) {
+        return new RecordNotFoundException($"Movie with id \"{id}\" not found");
+    }
+
     public static ObjectsAreNotEqual PasswordsDoNotMatch() {
         return new ObjectsAreNotEqual("The entered passwords do not match");
     }

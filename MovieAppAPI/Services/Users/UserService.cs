@@ -33,19 +33,6 @@ public class UserService : IUserService {
         return await _context.Users.AnyAsync(user => user.Email == email);
     }
 
-    // private async Task<bool> IsUserExists<TEntity>(TEntity entity) {
-    //     var entityType = typeof(TEntity);
-    //     var entityProperties = entityType.GetProperties();
-    //
-    //     foreach (var propertyInfo in entityProperties) {
-    //         var propName = propertyInfo.Name.ToLower();
-    //
-    //         if (propName is "email" or "username") {
-    //             
-    //         }
-    //     }
-    // }
-
     public IEnumerable<User> GetAll() {
         return _context.Users;
     }
@@ -76,7 +63,6 @@ public class UserService : IUserService {
         newUser.PasswordHash = Hashing.ComputeSha256Hash(user.Password);
 
         _context.Users.Add(newUser);
-        // Remake
         await _context.SaveChangesAsync();
     }
 
@@ -96,7 +82,6 @@ public class UserService : IUserService {
         }
 
         _context.Users.Update(newUser);
-
         await _context.SaveChangesAsync();
     }
 
@@ -116,8 +101,7 @@ public class UserService : IUserService {
         if (!isExists) {
             throw ExceptionHelper.UserNotFoundException(email: email);
         }
-
-        // _context.Users.FromSqlInterpolated($"DELETE FROM \"user\" WHERE \"Email\"='{email}'");
+        
         var user = _context.Users.SingleOrDefault(user => user.Email == email);
         _context.Users.Remove(user!);
         await _context.SaveChangesAsync();

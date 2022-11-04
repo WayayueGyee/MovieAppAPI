@@ -3,6 +3,7 @@ using MovieAppAPI.Entities;
 using MovieAppAPI.Entities.Auth;
 using MovieAppAPI.Entities.Users;
 using MovieAppAPI.Models.Auth;
+using MovieAppAPI.Models.Movies;
 using MovieAppAPI.Models.Users;
 using NuGet.Common;
 
@@ -10,6 +11,7 @@ namespace MovieAppAPI.Config;
 
 public class MappingProfile : Profile {
     public MappingProfile() {
+        // User
         CreateMap<User, UserCreateModel>()
             // .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate))
             .ReverseMap()
@@ -19,8 +21,14 @@ public class MappingProfile : Profile {
             .ForMember(dest => dest.BirthDate, opt => opt.Condition((src, dest) => src.BirthDate != null))
             .IgnoreNullProperties();
 
+        // Auth
         CreateMap<UserRegisterModel, UserCreateModel>();
         CreateMap<UserLogoutModel, InvalidToken>();
+
+        // Movies
+        CreateMap<CreateMovieModel, Movie>();
+        CreateMap<UpdateMovieModel, Movie>().IgnoreNullProperties();
+        CreateMap<Movie, CreateMovieResponseModel>();
     }
 }
 

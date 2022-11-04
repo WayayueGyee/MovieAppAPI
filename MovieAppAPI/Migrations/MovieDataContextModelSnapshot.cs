@@ -34,7 +34,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasIndex("MoviesId");
 
-                    b.ToTable("GenreMovie", (string)null);
+                    b.ToTable("GenreMovie");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Auth.InvalidToken", b =>
@@ -51,7 +51,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("invalid_token", (string)null);
+                    b.ToTable("invalid_token");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Country", b =>
@@ -66,7 +66,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("country", (string)null);
+                    b.ToTable("country");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Genre", b =>
@@ -81,7 +81,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("genre", (string)null);
+                    b.ToTable("genre");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Movie", b =>
@@ -96,7 +96,7 @@ namespace MovieAppAPI.Migrations
                     b.Property<int?>("Budget")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("CountryId")
+                    b.Property<Guid?>("CountryId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")
@@ -127,7 +127,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("movie", (string)null);
+                    b.ToTable("movie");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Review", b =>
@@ -143,8 +143,7 @@ namespace MovieAppAPI.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<Guid>("MovieId")
-                        .HasColumnType("uuid")
-                        .HasColumnOrder(1);
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Rating")
                         .HasColumnType("integer");
@@ -154,8 +153,7 @@ namespace MovieAppAPI.Migrations
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
-                        .HasColumnName("Author")
-                        .HasColumnOrder(2);
+                        .HasColumnName("Author");
 
                     b.HasKey("Id");
 
@@ -163,7 +161,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("review", (string)null);
+                    b.ToTable("review");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Users.User", b =>
@@ -202,7 +200,7 @@ namespace MovieAppAPI.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("user", (string)null);
+                    b.ToTable("user");
                 });
 
             modelBuilder.Entity("GenreMovie", b =>
@@ -224,9 +222,7 @@ namespace MovieAppAPI.Migrations
                 {
                     b.HasOne("MovieAppAPI.Entities.Country", "Country")
                         .WithMany()
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CountryId");
 
                     b.Navigation("Country");
                 });
