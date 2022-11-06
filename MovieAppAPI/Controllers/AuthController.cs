@@ -19,12 +19,9 @@ public class AuthController : ControllerBase {
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(UserRegisterModel registerModel) {
-        // TODO: ask if there is way not to use the response functions
         try {
-            var token = await _authService.Register(registerModel);
-            var response = new { token = token };
-            return new JsonResult(response);
-            // return Created(Request.Path.Value ?? "", response);
+            var response = await _authService.Register(registerModel);
+            return Created($"~/api/user/{response.Id}", response.Token);
         }
         catch (ObjectsAreNotEqual e) {
             return Unauthorized(e.Message);
@@ -38,12 +35,11 @@ public class AuthController : ControllerBase {
     }
 
     [HttpPost("login")]
-    public IActionResult Login(UserLoginModel loginModel) {
+    public async Task<IActionResult> Login(UserLoginModel loginModel) {
         try {
-            var token = _authService.Login(loginModel);
+            var token = await _authService.Login(loginModel);
             var response = new { token = token };
-            return new JsonResult(response);
-            // return Created(Request.Path.Value ?? "", response);
+            return Ok(response);
         }
         catch (ObjectsAreNotEqual e) {
             return Unauthorized(e.Message);

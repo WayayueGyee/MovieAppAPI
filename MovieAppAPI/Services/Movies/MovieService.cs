@@ -1,4 +1,3 @@
-using System.Security.Policy;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Data;
@@ -6,6 +5,7 @@ using MovieAppAPI.Entities;
 using MovieAppAPI.Exceptions;
 using MovieAppAPI.Helpers;
 using MovieAppAPI.Models.Movies;
+using MovieAppAPI.Services.Countries;
 using MovieAppAPI.Services.Users;
 
 namespace MovieAppAPI.Services.Movies;
@@ -13,12 +13,15 @@ namespace MovieAppAPI.Services.Movies;
 public class MovieService : IMovieService {
     private readonly MovieDataContext _context;
     private readonly IUserService _userService;
+    private readonly ICountryService _countryService;
     private readonly IMapper _mapper;
 
-    public MovieService(MovieDataContext context, IUserService userService, IMapper mapper) {
+    public MovieService(MovieDataContext context, IUserService userService, IMapper mapper,
+        ICountryService countryService) {
         _context = context;
         _userService = userService;
         _mapper = mapper;
+        _countryService = countryService;
     }
 
     public async Task<IEnumerable<Movie>?> GetAll() {
@@ -38,16 +41,31 @@ public class MovieService : IMovieService {
         return await _context.Movies.AnyAsync(movie => movie.Id == id);
     }
     
+    private async Task AddCountry(string? countryName, Movie movie) {
+        if (countryName is null) return;
+
+        var country = await _countryService.GetByCountryName(countryName);
+
+        if (country is null) {
+            throw ExceptionHelper.CountryNotFoundException(name: countryName);
+        }
+
+        movie.Country = country;
+    }
+
+    /// <exception cref="RecordNotFoundException"></exception>
     public async Task<MovieCreateResponseModel> Create(MovieCreateModel movieCreateModel) {
         var newMovie = _mapper.Map<Movie>(movieCreateModel);
-        // TODO: add countryId by country name
+
+        await AddCountry(movieCreateModel.CountryName, newMovie);
+
         _context.Movies.Add(newMovie);
         await _context.SaveChangesAsync();
 
         var response = _mapper.Map<MovieCreateResponseModel>(newMovie);
         return response;
     }
-    
+
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task Update(Guid id, MovieUpdateModel movieUpdateModel) {
         var dbMovie = await _context.Movies.FindAsync(id);
@@ -63,7 +81,9 @@ public class MovieService : IMovieService {
         if (movieUpdateModel.Time is null) {
             updatedMovie.Time = oldTime;
         }
-        
+
+        await AddCountry(movieUpdateModel.CountryName, updatedMovie);
+
         _context.Update(updatedMovie);
         await _context.SaveChangesAsync();
     }

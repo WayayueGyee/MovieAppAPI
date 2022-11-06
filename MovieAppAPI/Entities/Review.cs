@@ -8,8 +8,16 @@ namespace MovieAppAPI.Entities;
 [Table("review")]
 [Index("MovieId", "UserId", IsUnique = true)]
 public class Review {
+    public Review() {
+        Id = Guid.Empty;
+    }
+
+    public Review(Guid id) {
+        Id = id;
+    }
+
     [Key] public Guid Id { get; set; }
-    [Required] public int Rating { get; set; }
+    [Range(0, 10)] [Required] public int Rating { get; set; }
     public string? ReviewText { get; set; }
     [Required] public bool IsAnonymous { get; set; }
     [Required] public DateTime CreateDateTime { get; set; }
@@ -18,6 +26,5 @@ public class Review {
     [ForeignKey("MovieId")] public Movie Movie { get; set; }
 
     [Required] [Column("Author")] public Guid UserId { get; set; }
-
     [ForeignKey("UserId")] public User Author { get; set; }
 }

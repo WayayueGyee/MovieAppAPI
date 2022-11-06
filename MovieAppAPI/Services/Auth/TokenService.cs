@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MovieAppAPI.Config;
 using MovieAppAPI.Data;
@@ -10,11 +11,9 @@ namespace MovieAppAPI.Services.Auth;
 
 public class TokenService : ITokenService {
     private readonly MovieDataContext _context;
-    private readonly IUserService _userService;
 
     public TokenService(MovieDataContext context, IUserService userService) {
         _context = context;
-        _userService = userService;
     }
 
     public async Task<bool> SaveToken(string token) {
@@ -25,14 +24,14 @@ public class TokenService : ITokenService {
         return result > 0;
     }
 
-    public Task<bool> IsTokenValid(string stringToken) {
-        var dbToken = _context.ValidTokens.FirstOrDefault(token => token.Token == stringToken);
+    public async Task<bool> IsTokenValid(string stringToken) {
+        var dbToken = await _context.ValidTokens.FirstOrDefaultAsync(token => token.Token == stringToken);
         if (dbToken is null) {
-            return Task.FromResult(true);
+            return true;
         }
-        
+
         var jwt = new JwtSecurityToken(dbToken.Token);
-        return Task.FromResult(!IsTokenExpired(jwt));
+        return !IsTokenExpired(jwt);
     }
 
     private static bool IsTokenExpired(JwtSecurityToken jwt) {
@@ -46,8 +45,8 @@ public class TokenService : ITokenService {
         return result > 0;
     }
 
-    public string GenerateToken(string email) {
-        var claimsIdentity = GetIdentity(email);
+    public string GenerateToken(string id) {
+        var claimsIdentity = GetIdentity(id);
 
         var now = DateTime.UtcNow;
         var jwt = new JwtSecurityToken(
@@ -63,15 +62,11 @@ public class TokenService : ITokenService {
         return encodedJwt;
     }
 
-    private ClaimsIdentity GetIdentity(string email) {
-        var user = _userService.GetByEmail(email);
-        Console.WriteLine(user.Email);
-
+    private static ClaimsIdentity GetIdentity(string id) {
         var claims = new List<Claim> {
-            new(ClaimsIdentity.DefaultNameClaimType, user.Email)
+            new(JwtRegisteredClaimNames.Sub, id)
         };
-        var claimsIdentity = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-            ClaimsIdentity.DefaultRoleClaimType);
+        var claimsIdentity = new ClaimsIdentity(claims, "Token");
 
         return claimsIdentity;
     }

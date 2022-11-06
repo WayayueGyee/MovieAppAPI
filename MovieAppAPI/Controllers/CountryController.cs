@@ -50,7 +50,7 @@ public class CountryController : ControllerBase {
             return Created($"~api/country/{country.Id}", country);
         }
         catch (AlreadyExistsException e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return Conflict($"Country with name \"{countryCreateModel.CountryName}\" already exists");
         }
     }
@@ -62,15 +62,15 @@ public class CountryController : ControllerBase {
             return NoContent();
         }
         catch (AlreadyExistsException e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return Conflict($"Country with name \"{countryUpdateModel.CountryName}\" already exists");
         }
         catch (RecordNotFoundException e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return NotFound(e.Message);
         }
         catch (DbUpdateConcurrencyException e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     } 
@@ -82,7 +82,7 @@ public class CountryController : ControllerBase {
             return NoContent();
         }
         catch (RecordNotFoundException e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return NotFound(e.Message);
         }
     }

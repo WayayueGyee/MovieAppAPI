@@ -5,8 +5,8 @@ using MovieAppAPI.Entities.Users;
 using MovieAppAPI.Models.Auth;
 using MovieAppAPI.Models.Countries;
 using MovieAppAPI.Models.Movies;
+using MovieAppAPI.Models.Reviews;
 using MovieAppAPI.Models.Users;
-using NuGet.Common;
 
 namespace MovieAppAPI.Config;
 
@@ -21,7 +21,8 @@ public class MappingProfile : Profile {
             .ReverseMap()
             .ForMember(dest => dest.BirthDate, opt => opt.Condition((src, dest) => src.BirthDate != null))
             .IgnoreNullProperties();
-
+        CreateMap<User, UserShortModel>();
+        
         // Auth
         CreateMap<UserRegisterModel, UserCreateModel>();
         CreateMap<UserLogoutModel, InvalidToken>();
@@ -34,6 +35,17 @@ public class MappingProfile : Profile {
         // Countries
         CreateMap<CountryCreateModel, Country>();
         CreateMap<CountryUpdateModel, Country>();
+        
+        // Reviews
+        CreateMap<ReviewCreateModel, Review>();
+        CreateMap<ReviewUpdateModel, Review>().IgnoreNullProperties();
+        CreateMap<Review, ReviewModel>().AfterMap<MapReviewAndReviewModelAction>();
+    }
+}
+
+public class MapReviewAndReviewModelAction : IMappingAction<Review, ReviewModel> {
+    public void Process(Review source, ReviewModel destination, ResolutionContext context) {
+        context.Mapper.Map(source.Author, destination.Author);
     }
 }
 

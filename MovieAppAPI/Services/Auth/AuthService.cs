@@ -9,6 +9,16 @@ using MovieAppAPI.Utils;
 
 namespace MovieAppAPI.Services.Auth;
 
+public class RegisterResponseModel {
+    public RegisterResponseModel(string token, string id) {
+        Token = token;
+        Id = id;
+    }
+
+    public string Token { get; set; }
+    public string Id { get; set; }
+}
+
 public class AuthService : IAuthService {
     private readonly IUserService _userService;
     private readonly ITokenService _tokenService;
@@ -19,33 +29,34 @@ public class AuthService : IAuthService {
         _mapper = mapper;
         _tokenService = tokenService;
     }
-
-    // TODO: ask when to use exceptions 
-    // TODO: make logout 
-    // TODO: save tokens in database when logging out
+    
     /// <exception cref="ObjectsAreNotEqual"></exception>
-    public async Task<string> Register(UserRegisterModel registerModel) {
+    public async Task<RegisterResponseModel> Register(UserRegisterModel registerModel) {
         if (registerModel.Password != registerModel.PasswordCheck) {
             throw ExceptionHelper.PasswordsDoNotMatch();
         }
 
         var createModel = _mapper.Map<UserCreateModel>(registerModel);
-        // TODO: is it worth to await here???
-        await _userService.Create(createModel);
-        var token = _tokenService.GenerateToken(registerModel.Email);
+        var user = await _userService.Create(createModel);
+        var token = _tokenService.GenerateToken(user.Id.ToString());
 
-        return token;
+        return new RegisterResponseModel(token, user.Id.ToString());
     }
 
     /// <exception cref="ObjectsAreNotEqual"></exception>
+    /// <exception cref="RecordNotFoundException"></exception>
     public Task<string> Login(UserLoginModel loginModel) {
         var user = _userService.GetByUserName(loginModel.UserName);
+
+        if (user is null) {
+            throw ExceptionHelper.UserNotFoundException(userName: loginModel.UserName);
+        }
 
         if (Hashing.ComputeSha256Hash(loginModel.Password) != user.PasswordHash) {
             throw ExceptionHelper.PasswordsDoNotMatch();
         }
 
-        var token = _tokenService.GenerateToken(user.Email);
+        var token = _tokenService.GenerateToken(user.Id.ToString());
 
         return Task.FromResult(token);
     }

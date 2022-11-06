@@ -26,6 +26,11 @@ public class CountryService : ICountryService {
         return country;
     }
 
+    public async Task<Country?> GetByCountryName(string countryName) {
+        var country = await _context.Countries.SingleOrDefaultAsync(c => c.CountryName == countryName);
+        return country;
+    }
+
     private async Task<bool> IsCountryExists(string countryName) {
         return await _context.Countries.AnyAsync(country => country.CountryName == countryName);
     }

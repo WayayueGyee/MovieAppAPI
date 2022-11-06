@@ -31,7 +31,7 @@ public class UserController : ControllerBase {
         if (user is null) {
             return NotFound($"User with id \"{id.ToString()}\" not found");
         }
-        
+
         return Ok(user);
     }
 
@@ -39,15 +39,15 @@ public class UserController : ControllerBase {
     public async Task<IActionResult> CreateUser(UserCreateModel user) {
         try {
             await _userService.Create(user);
-            _logger.LogInformation("Create method executed. User: \n{@User} \ncreated", user);
+            _logger.LogError("Create method executed. User: \n{@User} \ncreated", user);
             return Ok("User was successfully created");
         }
         catch (AlreadyExistsException e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return NotFound(e.Message);
         }
         catch (DbUpdateException e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }

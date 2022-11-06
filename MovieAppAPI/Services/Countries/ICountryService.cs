@@ -7,6 +7,7 @@ namespace MovieAppAPI.Services.Countries;
 public interface ICountryService {
     Task<IEnumerable<Country>?> GetAll();
     Task<Country?> GetById(Guid id);
+    Task<Country?> GetByCountryName(string countryName);
 
     /// <exception cref="AlreadyExistsException"></exception>
     Task<Country> Create(CountryCreateModel countryCreateModel);

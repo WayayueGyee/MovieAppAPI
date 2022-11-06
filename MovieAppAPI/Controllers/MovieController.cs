@@ -29,16 +29,17 @@ public class MovieController : ControllerBase {
             return NotFound();
         }
         
-        _logger.LogInformation("Get all movies");
+        _logger.LogInformation("Movies fetched");
         return Ok(movies);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<Movie>> GetById(Guid id) {
         var movie = await _movieService.GetById(id);
+        
         if (movie is null) {
-            _logger.LogInformation("Movie with id \"{Id}\" not found", id.ToString());
-            return NotFound($"Movie with id \"{id.ToString()}\" not found");
+            _logger.LogInformation("Movie with id '{Id}' not found", id.ToString());
+            return NotFound($"Movie with id '{id.ToString()}' not found");
         }
 
         _logger.LogInformation("Movie: {@Movie}", movie);
@@ -51,8 +52,12 @@ public class MovieController : ControllerBase {
             var movie = await _movieService.Create(movieCreateModel);
             return Created($"~api/movie/{movie.Id}", movie);
         }
+        catch (RecordNotFoundException e) {
+            _logger.LogError("{E}", e.StackTrace);
+            return NotFound(e.Message);
+        }
         catch (Exception e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
@@ -64,11 +69,11 @@ public class MovieController : ControllerBase {
             return NoContent();
         }
         catch (RecordNotFoundException e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return NotFound(e.Message);
         }
         catch (DbUpdateConcurrencyException e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
@@ -80,7 +85,7 @@ public class MovieController : ControllerBase {
             return NoContent();
         }
         catch (RecordNotFoundException e) {
-            _logger.LogInformation("{E}", e.StackTrace);
+            _logger.LogError("{E}", e.StackTrace);
             return NotFound(e.Message);
         }
     }
