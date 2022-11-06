@@ -17,8 +17,10 @@ public class User {
     [EmailAddress] [Required] public string Email { get; set; }
     public DateTime? BirthDate { get; set; }
     public Gender? Gender { get; set; }
+    public string? Avatar { get; set; }
+    public Role Role { get; set; } = Role.User;
 
-    public User(string userName, string passwordHash, string email, DateTime birthDate, Gender gender, string name) {
+    public User(string userName, string passwordHash, string email, DateTime birthDate, Gender gender, string name, Role role) {
         Id = Guid.NewGuid();
         UserName = userName;
         PasswordHash = passwordHash;
@@ -26,6 +28,7 @@ public class User {
         BirthDate = birthDate;
         Gender = gender;
         Name = name;
+        Role = role;
     }
 
     public User(Guid id) {
