@@ -35,9 +35,9 @@ public class AuthController : ControllerBase {
     }
 
     [HttpPost("login")]
-    public IActionResult Login(UserLoginModel loginModel) {
+    public async Task<IActionResult> Login(UserLoginModel loginModel) {
         try {
-            var token = _authService.Login(loginModel);
+            var token = await _authService.Login(loginModel);
             var response = new { token = token };
             return Ok(response);
         }
