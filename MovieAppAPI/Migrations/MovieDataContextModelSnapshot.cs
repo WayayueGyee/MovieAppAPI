@@ -66,6 +66,9 @@ namespace MovieAppAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CountryName")
+                        .IsUnique();
+
                     b.ToTable("country");
                 });
 
@@ -171,6 +174,9 @@ namespace MovieAppAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Avatar")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -188,6 +194,9 @@ namespace MovieAppAPI.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
 
                     b.Property<string>("UserName")
                         .IsRequired()

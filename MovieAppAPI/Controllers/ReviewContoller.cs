@@ -1,103 +1,136 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Data;
 using MovieAppAPI.Entities;
+using MovieAppAPI.Exceptions;
+using MovieAppAPI.Helpers;
+using MovieAppAPI.Models.Reviews;
+using MovieAppAPI.Services.Reviews;
+using Npgsql;
 
 namespace MovieAppAPI.Controllers;
 
-[Route("api/review")]
+[Route("api/movie")]
 [ApiController]
+[Authorize("TokenNotRejected")]
 public class ReviewController : ControllerBase {
     private readonly MovieDataContext _context;
+    private readonly IReviewService _reviewService;
+    private readonly ILogger<ReviewController> _logger;
 
-    public ReviewController(MovieDataContext context) {
+    public ReviewController(MovieDataContext context, IReviewService reviewService, ILogger<ReviewController> logger) {
         _context = context;
+        _reviewService = reviewService;
+        _logger = logger;
     }
 
-    // GET: api/ReviewContoller
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Review>>> GetReviews() {
-        if (_context.Reviews == null) {
-            return NotFound();
-        }
-
-        return await _context.Reviews.ToListAsync();
+    private string? GetUserIdFromToken() {
+        var id = User.Claims.FirstOrDefault(claim =>
+                claim.Type == ClaimTypes.NameIdentifier)
+            ?.Value;
+        return id;
     }
+    
+    [HttpGet("/api/review")]
+    public async Task<ActionResult<IEnumerable<ReviewModel>>> GetReviews() {
+        var reviews = await _reviewService.GetAll();
 
-    // GET: api/ReviewContoller/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Review>> GetReview(Guid id) {
-        if (_context.Reviews == null) {
+        if (reviews is null) {
+            _logger.LogInformation("Reviews not found");
             return NotFound();
         }
-
-        var review = await _context.Reviews.FindAsync(id);
-
+        
+        _logger.LogInformation("Reviews fetched");
+        return Ok(reviews);
+    }
+    
+    
+    [HttpGet("/api/review/{id:guid}")]
+    public async Task<ActionResult<ReviewModel>> GetReview(Guid id) {
+        var review = await _reviewService.GetById(id);
+    
         if (review == null) {
-            return NotFound();
+            _logger.LogInformation("Review with id '{Id}' not found", id.ToString());
+            return NotFound($"Review with id '{id.ToString()}' not found");
         }
-
-        return review;
+    
+        _logger.LogInformation("Review: {@Review}", review);
+        return Ok(review);
     }
+    //
+    // // PUT: api/ReviewContoller/5
+    // // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    // [HttpPut("{id:guid}")]
+    // public async Task<IActionResult> PutReview(Guid id, Review review) {
+    //     if (id != review.Id) {
+    //         return BadRequest();
+    //     }
+    //
+    //     _context.Entry(review).State = EntityState.Modified;
+    //
+    //     try {
+    //         await _context.SaveChangesAsync();
+    //     }
+    //     catch (DbUpdateConcurrencyException) {
+    //         if (!ReviewExists(id)) {
+    //             return NotFound();
+    //         }
+    //         else {
+    //             throw;
+    //         }
+    //     }
+    //
+    //     return NoContent();
+    // }
+    
+    [HttpPost("{movieId:guid}/review/add")]
+    [Authorize("TokenNotRejected")]
+    public async Task<ActionResult<ReviewModel>> CreateReview(Guid movieId, ReviewCreateModel reviewCreateModel) {
+        try {
+            var userId = GetUserIdFromToken();
 
-    // PUT: api/ReviewContoller/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutReview(Guid id, Review review) {
-        if (id != review.Id) {
+            if (userId is null) {
+                throw ExceptionHelper.InvalidTokenException("Token has invalid claim type");
+            }
+
+            var review = await _reviewService.Create(movieId.ToString(), userId, reviewCreateModel);
+            return Created($"~api/review/{review.Id.ToString()}", review);
+        }
+        catch (InvalidTokenException e) {
+            _logger.LogError("{E}", e.Message);
             return BadRequest();
         }
-
-        _context.Entry(review).State = EntityState.Modified;
-
-        try {
-            await _context.SaveChangesAsync();
+        catch (DbUpdateConcurrencyException e) {
+            _logger.LogError("{E}", e.StackTrace);
+            return BadRequest();
         }
-        catch (DbUpdateConcurrencyException) {
-            if (!ReviewExists(id)) {
-                return NotFound();
-            }
-            else {
-                throw;
-            }
+        catch (DbUpdateException e) when (e.InnerException is PostgresException { SqlState: "23505" }) {
+            _logger.LogError("{E}", e.StackTrace);
+            return BadRequest();
         }
-
-        return NoContent();
     }
-
-    // POST: api/ReviewContoller
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost]
-    public async Task<ActionResult<Review>> PostReview(Review review) {
-        if (_context.Reviews == null) {
-            return Problem("Entity set 'MovieDataContext.Reviews'  is null.");
-        }
-
-        _context.Reviews.Add(review);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction("GetReview", new { id = review.Id }, review);
-    }
-
-    // DELETE: api/ReviewContoller/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteReview(Guid id) {
-        if (_context.Reviews == null) {
-            return NotFound();
-        }
-
-        var review = await _context.Reviews.FindAsync(id);
-        if (review == null) {
-            return NotFound();
-        }
-
-        _context.Reviews.Remove(review);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-    private bool ReviewExists(Guid id) {
-        return (_context.Reviews?.Any(e => e.Id == id)).GetValueOrDefault();
-    }
+    //
+    // // DELETE: api/ReviewContoller/5
+    // [HttpDelete("{id}")]
+    // public async Task<IActionResult> DeleteReview(Guid id) {
+    //     if (_context.Reviews == null) {
+    //         return NotFound();
+    //     }
+    //
+    //     var review = await _context.Reviews.FindAsync(id);
+    //     if (review == null) {
+    //         return NotFound();
+    //     }
+    //
+    //     _context.Reviews.Remove(review);
+    //     await _context.SaveChangesAsync();
+    //
+    //     return NoContent();
+    // }
+    //
+    // private bool ReviewExists(Guid id) {
+    //     return (_context.Reviews?.Any(e => e.Id == id)).GetValueOrDefault();
+    // }
 }

@@ -1,15 +1,20 @@
+using MovieAppAPI.Entities.Users;
 using MovieAppAPI.Exceptions;
 
 namespace MovieAppAPI.Helpers;
 
 public static class ExceptionHelper {
+    public static InvalidTokenException InvalidTokenException(string? message = null) {
+        throw new InvalidTokenException(message);
+    }
+    
     public static RecordNotFoundException UserNotFoundException(string? id = null, string? email = null,
         string? userName = null) {
-        var idMessage = id is not null ? $" id \"{id}\" " : "";
-        var emailMessage = email is not null ? $" email \"{email}\" " : "";
-        var userNameMessage = userName is not null ? $" user name \"{userName}\" " : "";
+        var idMessage = id is not null ? $"id '{id}'" : "";
+        var emailMessage = email is not null ? $"email '{email}'" : "";
+        var userNameMessage = userName is not null ? $"user name '{userName}'" : "";
 
-        var message = idMessage + emailMessage + userNameMessage;
+        var message = string.Join(" and ", idMessage, emailMessage, userNameMessage);
 
         return new RecordNotFoundException($"User with{message}not found");
     }
@@ -20,14 +25,14 @@ public static class ExceptionHelper {
         }
 
         if (email is null && username is not null) {
-            return new AlreadyExistsException($"User with user name \"{username}\" already exists");
+            return new AlreadyExistsException($"User with user name '{username}' already exists");
         }
 
         if (email is not null && username is null) {
-            return new AlreadyExistsException($"User with email \"{email}\" already exists");
+            return new AlreadyExistsException($"User with email '{email}' already exists");
         }
 
-        return new AlreadyExistsException($"User with email \"{email}\" already exists");
+        return new AlreadyExistsException($"User with email '{email}' already exists");
     }
 
     public static ObjectsAreNotEqual PasswordsDoNotMatch() {
@@ -35,18 +40,23 @@ public static class ExceptionHelper {
     }
 
     public static AlreadyExistsException MovieAlreadyExistsException(string id) {
-        return new AlreadyExistsException($"Movie with id \"{id}\" is already exists");
+        return new AlreadyExistsException($"Movie with id '{id}' is already exists");
     }
 
     public static RecordNotFoundException MovieNotFoundException(string id) {
-        return new RecordNotFoundException($"Movie with id \"{id}\" not found");
+        return new RecordNotFoundException($"Movie with id '{id}' not found");
     }
 
     public static AlreadyExistsException CountryAlreadyExistsException(string countryName) {
-        return new AlreadyExistsException($"Country with name \"{countryName}\" is already exists");
+        return new AlreadyExistsException($"Country with name '{countryName}' is already exists");
     }
 
-    public static RecordNotFoundException CountryNotFoundException(string id) {
-        return new RecordNotFoundException($"Country with id \"{id}\" not found");
+    public static RecordNotFoundException CountryNotFoundException(string? id = null, string? name = null) {
+        var idMessage = id ?? $"id '{id}'";
+        var nameMessage = name ?? $"name '{name}'";
+        
+        var message = string.Join(" and ", idMessage, nameMessage);
+
+        return new RecordNotFoundException($"Country with {message} not found");
     }
 }

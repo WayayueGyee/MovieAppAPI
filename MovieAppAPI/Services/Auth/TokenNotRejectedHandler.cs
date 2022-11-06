@@ -14,18 +14,21 @@ public class TokenNotRejectedAuthorizationHandler : AuthorizationHandler<TokenNo
         TokenNotRejectedRequirement requirement, HttpContext httpContext) {
         if (!httpContext.Request.Headers.ContainsKey("Authorization")) {
             context.Fail(new AuthorizationFailureReason(this, "No authorization header"));
+            return Task.CompletedTask;
         }
 
         string authHeader = httpContext.Request.Headers.Authorization;
 
         if (string.IsNullOrEmpty(authHeader)) {
             context.Fail(new AuthorizationFailureReason(this, "Empty authorization header"));
+            return Task.CompletedTask;
         }
 
         const string authType = "bearer";
 
         if (!authHeader.StartsWith(authType, StringComparison.OrdinalIgnoreCase)) {
             context.Fail(new AuthorizationFailureReason(this, "Token type is invalid"));
+            return Task.CompletedTask;
         }
 
         var token = authHeader[authType.Length..];

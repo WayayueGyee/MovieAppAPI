@@ -12,6 +12,7 @@ using MovieAppAPI.Middlewares;
 using MovieAppAPI.Services.Auth;
 using MovieAppAPI.Services.Countries;
 using MovieAppAPI.Services.Movies;
+using MovieAppAPI.Services.Reviews;
 using MovieAppAPI.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,7 @@ services.AddControllers().AddJsonOptions(options => {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    // options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
 });
 
 // AutoMapper
@@ -63,6 +65,7 @@ services.AddScoped<IAuthService, AuthService>();
 services.AddScoped<ITokenService, TokenService>();
 services.AddScoped<IMovieService, MovieService>();
 services.AddScoped<ICountryService, CountryService>();
+services.AddScoped<IReviewService, ReviewService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();

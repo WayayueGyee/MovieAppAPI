@@ -52,7 +52,7 @@ public class UserService : IUserService {
         return user;
     }
 
-    public async Task Create(UserCreateModel user) {
+    public async Task<User> Create(UserCreateModel user) {
         var isExists = await IsUserExists(user);
         if (isExists) {
             throw ExceptionHelper.UserAlreadyExistsException(user.Email, user.UserName);
@@ -64,6 +64,8 @@ public class UserService : IUserService {
 
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
+        
+        return newUser;
     }
 
     public async Task Update(Guid id, UserUpdateModel user) {

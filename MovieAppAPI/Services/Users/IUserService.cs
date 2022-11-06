@@ -8,7 +8,7 @@ public interface IUserService {
     Task<User?> GetById(Guid id);
     User? GetByEmail(string email);
     User? GetByUserName(string userName);
-    Task Create(UserCreateModel user);
+    Task<User> Create(UserCreateModel user);
     Task Update(Guid id, UserUpdateModel user);
     Task Delete(Guid id);
     Task Delete(string email);
