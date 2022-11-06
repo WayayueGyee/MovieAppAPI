@@ -73,7 +73,7 @@ public class CountryController : ControllerBase {
             _logger.LogInformation("{E}", e.StackTrace);
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
-    }
+    } 
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteMovie(Guid id) {
