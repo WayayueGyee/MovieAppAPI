@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Data;
 using MovieAppAPI.Entities;
+using MovieAppAPI.Exceptions;
 using MovieAppAPI.Helpers;
 using MovieAppAPI.Models.Reviews;
 using MovieAppAPI.Services.Movies;
@@ -23,8 +24,13 @@ public class ReviewService : IReviewService {
         _userService = userService;
     }
 
+    private async Task<bool> IsReviewExists(Guid id) {
+        return await _context.Reviews.AnyAsync(review => review.Id == id);
+    }
+
     public async Task<IEnumerable<ReviewModel>?> GetAll() {
-        var reviewsModelList = await _context.Reviews.Select(review => _mapper.Map<ReviewModel>(review)).ToListAsync();
+        var reviewsModelList = await _context.Reviews.Include(model => model.Author)
+            .Select(review => _mapper.Map<ReviewModel>(review)).ToListAsync();
         return reviewsModelList;
     }
 
@@ -34,6 +40,7 @@ public class ReviewService : IReviewService {
         return reviewModel;
     }
 
+    /// <exception cref="RecordNotFoundException"></exception>
     public async Task<ReviewModel> Create(string movieId, string userId, ReviewCreateModel reviewCreateModel) {
         var review = _mapper.Map<Review>(reviewCreateModel);
         review.Movie = await _movieService.GetById(Guid.Parse(movieId)) ??
@@ -49,15 +56,53 @@ public class ReviewService : IReviewService {
         return reviewModel;
     }
 
-    private async Task<bool> IsReviewExists(Guid id) {
-        return await _context.Reviews.AnyAsync(review => review.Id == id);
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task Update(Guid id, ReviewUpdateModel reviewUpdateModel) {
+        var dbReview = await _context.Reviews.FindAsync(id);
+
+        if (dbReview is null) {
+            throw ExceptionHelper.ReviewNotFoundException(id.ToString());
+        }
+
+        var updatedReview = _mapper.Map(reviewUpdateModel, dbReview);
+        _context.Update(updatedReview);
+        await _context.SaveChangesAsync();
     }
 
-    public Task Update(Guid id, ReviewUpdateModel reviewUpdateMovieModel) {
-        throw new NotImplementedException();
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task Update(Guid movieId, Guid reviewId, ReviewUpdateModel reviewUpdateModel) {
+        var dbReview = await _context.Reviews.FindAsync(reviewId);
+
+        if (dbReview is null) {
+            throw ExceptionHelper.ReviewNotFoundException(id: reviewId.ToString());
+        }
+
+        var updatedReview = _mapper.Map(reviewUpdateModel, dbReview);
+        _context.Update(updatedReview);
+        await _context.SaveChangesAsync();
     }
 
-    public Task Delete(Guid id) {
-        throw new NotImplementedException();
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task Delete(Guid id) {
+        var isExists = await IsReviewExists(id);
+        if (!isExists) {
+            throw ExceptionHelper.ReviewNotFoundException(id: id.ToString());
+        }
+
+        var review = new Review(id);
+        _context.Reviews.Remove(review);
+        await _context.SaveChangesAsync();
+    }
+
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task Delete(Guid movieId, Guid reviewId) {
+        var review = await _context.Reviews.FindAsync(reviewId);
+
+        if (review is null) {
+            throw ExceptionHelper.ReviewNotFoundException(id: reviewId.ToString());
+        }
+
+        _context.Reviews.Remove(review);
+        await _context.SaveChangesAsync();
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using MovieAppAPI.Entities.Users;
 using MovieAppAPI.Exceptions;
 
@@ -7,7 +8,7 @@ public static class ExceptionHelper {
     public static InvalidTokenException InvalidTokenException(string? message = null) {
         throw new InvalidTokenException(message);
     }
-    
+
     public static RecordNotFoundException UserNotFoundException(string? id = null, string? email = null,
         string? userName = null) {
         var idMessage = id is not null ? $"id '{id}'" : "";
@@ -52,11 +53,22 @@ public static class ExceptionHelper {
     }
 
     public static RecordNotFoundException CountryNotFoundException(string? id = null, string? name = null) {
-        var idMessage = id ?? $"id '{id}'";
-        var nameMessage = name ?? $"name '{name}'";
-        
+        var idMessage = id is null ? $"id '{id}'" : "";
+        var nameMessage = name is null ? $"name '{name}'" : "";
+
         var message = string.Join(" and ", idMessage, nameMessage);
 
         return new RecordNotFoundException($"Country with {message} not found");
+    }
+
+    public static RecordNotFoundException ReviewNotFoundException(string? id = null, string? movieId = null,
+        string? userId = null) {
+        var idMessage = id is null ? $"id '{id}'" : "";
+        var movieIdMessage = movieId is null ? $"movie id '{movieId}'" : "";
+        var userIdMessage = userId is null ? $"user id '{userId}'" : "";
+
+        var message = string.Join(" and ", idMessage, movieIdMessage, userIdMessage);
+
+        return new RecordNotFoundException($"Review with {message} not found");
     }
 }

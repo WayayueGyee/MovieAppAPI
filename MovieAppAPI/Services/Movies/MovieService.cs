@@ -41,7 +41,7 @@ public class MovieService : IMovieService {
         return await _context.Movies.AnyAsync(movie => movie.Id == id);
     }
     
-    private async Task AddCountryId(string? countryName, Movie movie) {
+    private async Task AddCountry(string? countryName, Movie movie) {
         if (countryName is null) return;
 
         var country = await _countryService.GetByCountryName(countryName);
@@ -50,14 +50,14 @@ public class MovieService : IMovieService {
             throw ExceptionHelper.CountryNotFoundException(name: countryName);
         }
 
-        movie.CountryId = country.Id;
+        movie.Country = country;
     }
 
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task<MovieCreateResponseModel> Create(MovieCreateModel movieCreateModel) {
         var newMovie = _mapper.Map<Movie>(movieCreateModel);
 
-        await AddCountryId(movieCreateModel.CountryName, newMovie);
+        await AddCountry(movieCreateModel.CountryName, newMovie);
 
         _context.Movies.Add(newMovie);
         await _context.SaveChangesAsync();
@@ -82,7 +82,7 @@ public class MovieService : IMovieService {
             updatedMovie.Time = oldTime;
         }
 
-        await AddCountryId(movieUpdateModel.CountryName, updatedMovie);
+        await AddCountry(movieUpdateModel.CountryName, updatedMovie);
 
         _context.Update(updatedMovie);
         await _context.SaveChangesAsync();

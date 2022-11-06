@@ -1,4 +1,3 @@
-using MovieAppAPI.Entities;
 using MovieAppAPI.Exceptions;
 using MovieAppAPI.Models.Reviews;
 
@@ -11,6 +10,16 @@ public interface IReviewService {
     /// <exception cref="RecordNotFoundException"></exception>
     Task<ReviewModel> Create(string movieId, string userId, ReviewCreateModel reviewCreateModel);
 
+    /// <exception cref="RecordNotFoundException"></exception>
     Task Update(Guid id, ReviewUpdateModel reviewUpdateModel);
+
+    /// <exception cref="RecordNotFoundException"></exception>
+    Task Update(Guid movieId, Guid userId, ReviewUpdateModel reviewUpdateModel);
+
+    /// <exception cref="RecordNotFoundException"></exception>
     Task Delete(Guid id);
+
+    /// <exception cref="RecordNotFoundException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
+    Task Delete(Guid movieId, Guid reviewId);
 }

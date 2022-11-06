@@ -64,7 +64,7 @@ public class UserService : IUserService {
 
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
-        
+
         return newUser;
     }
 
@@ -99,13 +99,13 @@ public class UserService : IUserService {
     }
 
     public async Task Delete(string email) {
-        var isExists = await IsUserExists(email);
-        if (!isExists) {
+        var user = _context.Users.SingleOrDefault(user => user.Email == email);
+
+        if (user is null) {
             throw ExceptionHelper.UserNotFoundException(email: email);
         }
-        
-        var user = _context.Users.SingleOrDefault(user => user.Email == email);
-        _context.Users.Remove(user!);
+
+        _context.Users.Remove(user);
         await _context.SaveChangesAsync();
     }
 }
