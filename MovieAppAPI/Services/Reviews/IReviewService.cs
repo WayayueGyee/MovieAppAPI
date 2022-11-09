@@ -14,7 +14,7 @@ public interface IReviewService {
     Task Update(Guid id, ReviewUpdateModel reviewUpdateModel);
 
     /// <exception cref="RecordNotFoundException"></exception>
-    Task Update(Guid movieId, Guid userId, ReviewUpdateModel reviewUpdateModel);
+    Task Update(Guid movieId, Guid reviewId, Guid userId, ReviewUpdateModel reviewUpdateModel);
 
     /// <exception cref="RecordNotFoundException"></exception>
     Task Delete(Guid id);

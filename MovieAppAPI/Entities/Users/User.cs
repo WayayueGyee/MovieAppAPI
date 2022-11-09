@@ -20,7 +20,10 @@ public class User {
     public string? Avatar { get; set; }
     public Role Role { get; set; } = Role.User;
 
-    public User(string userName, string passwordHash, string email, DateTime birthDate, Gender gender, string name, Role role) {
+    public List<FavoriteMovie>? FavoriteMovies { get; set; }
+
+    public User(string userName, string passwordHash, string email, DateTime birthDate, Gender gender, string name,
+        Role role) {
         Id = Guid.NewGuid();
         UserName = userName;
         PasswordHash = passwordHash;

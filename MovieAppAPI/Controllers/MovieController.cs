@@ -1,4 +1,3 @@
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Entities;
@@ -28,15 +27,41 @@ public class MovieController : ControllerBase {
             _logger.LogInformation("Movies not found");
             return NotFound();
         }
-        
+
         _logger.LogInformation("Movies fetched");
         return Ok(movies);
+    }
+
+    [HttpGet("/api/movies/{page:int}")]
+    public async Task<ActionResult<MoviePagedListModel>> GetPage(int page) {
+        var nextPage = await _movieService.GetPage(page);
+
+        if (nextPage is null) {
+            _logger.LogInformation("Next page with number {Page} not found", page);
+            return NotFound();
+        }
+
+        _logger.LogInformation("Page with number {Page} created", page);
+        return Ok(nextPage);
+    }
+
+    [HttpGet("/api/movies/details/{id:guid}")]
+    public async Task<ActionResult<MovieDetailsModel>> GetMovieDetails(Guid id) {
+        var movie = await _movieService.GetMovieDetails(id);
+
+        if (movie is null) {
+            _logger.LogInformation("Movie with id '{Id}' not found", id.ToString());
+            return NotFound($"Movie with id '{id.ToString()}' not found");
+        }
+
+        _logger.LogInformation("Movie: {@Movie}", movie);
+        return Ok(movie);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<Movie>> GetById(Guid id) {
         var movie = await _movieService.GetById(id);
-        
+
         if (movie is null) {
             _logger.LogInformation("Movie with id '{Id}' not found", id.ToString());
             return NotFound($"Movie with id '{id.ToString()}' not found");

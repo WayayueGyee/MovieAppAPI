@@ -1,4 +1,5 @@
-using MovieAppAPI.Entities;
+using MovieAppAPI.Models.Genres;
+using MovieAppAPI.Models.Reviews;
 
 namespace MovieAppAPI.Models.Movies;
 
@@ -15,6 +16,6 @@ public class MovieDetailsModel {
     public int? Fees { get; set; }
     public int AgeLimit { get; set; }
     public string? Country { get; set; }
-    public List<Review>? Reviews { get; set; }
-    public List<Genre>? Genres { get; set; }
+    public List<ReviewModel>? Reviews { get; set; }
+    public List<GenreModel>? Genres { get; set; }
 }

@@ -8,9 +8,11 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using MovieAppAPI.Config;
 using MovieAppAPI.Data;
+using MovieAppAPI.Entities;
 using MovieAppAPI.Middlewares;
 using MovieAppAPI.Services.Auth;
 using MovieAppAPI.Services.Countries;
+using MovieAppAPI.Services.FavouriteMovies;
 using MovieAppAPI.Services.Movies;
 using MovieAppAPI.Services.Reviews;
 using MovieAppAPI.Services.Users;
@@ -66,6 +68,7 @@ services.AddScoped<ITokenService, TokenService>();
 services.AddScoped<IMovieService, MovieService>();
 services.AddScoped<ICountryService, CountryService>();
 services.AddScoped<IReviewService, ReviewService>();
+services.AddScoped<IFavoriteMovieService, FavoriteMovieService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();

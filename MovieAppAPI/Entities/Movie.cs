@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.Build.Evaluation;
 
 namespace MovieAppAPI.Entities;
 
@@ -7,14 +8,10 @@ namespace MovieAppAPI.Entities;
 public class Movie {
     public Movie() {
         Id = Guid.NewGuid();
-        Reviews = new List<Review>();
-        Genres = new List<Genre>();
     }
 
     public Movie(Guid id) {
         Id = id;
-        Reviews = new List<Review>();
-        Genres = new List<Genre>();
     }
 
     public Movie(Guid id, string? name, string? poster, int year, TimeSpan time, string? tagline, string? description,
@@ -53,6 +50,8 @@ public class Movie {
     public Guid? CountryId { get; set; }
     public Country? Country { get; set; }
 
-    public List<Review>? Reviews { get; set; }
-    public List<Genre>? Genres { get; set; }
+    public List<Review> Reviews { get; set; }
+    public List<Genre> Genres { get; set; }
+
+    public List<FavoriteMovie> FavoriteMovies { get; set; }
 }

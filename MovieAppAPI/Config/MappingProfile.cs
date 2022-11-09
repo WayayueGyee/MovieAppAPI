@@ -4,6 +4,7 @@ using MovieAppAPI.Entities.Auth;
 using MovieAppAPI.Entities.Users;
 using MovieAppAPI.Models.Auth;
 using MovieAppAPI.Models.Countries;
+using MovieAppAPI.Models.Genres;
 using MovieAppAPI.Models.Movies;
 using MovieAppAPI.Models.Reviews;
 using MovieAppAPI.Models.Users;
@@ -19,10 +20,10 @@ public class MappingProfile : Profile {
             .IgnoreNullProperties();
         CreateMap<User, UserUpdateModel>()
             .ReverseMap()
-            .ForMember(dest => dest.BirthDate, opt => opt.Condition((src, dest) => src.BirthDate != null))
+            .ForMember(dest => dest.BirthDate, opt => opt.Condition((src, _) => src.BirthDate != null))
             .IgnoreNullProperties();
         CreateMap<User, UserShortModel>();
-        
+
         // Auth
         CreateMap<UserRegisterModel, UserCreateModel>();
         CreateMap<UserLogoutModel, InvalidToken>();
@@ -31,15 +32,21 @@ public class MappingProfile : Profile {
         CreateMap<MovieCreateModel, Movie>();
         CreateMap<MovieUpdateModel, Movie>().IgnoreNullProperties();
         CreateMap<Movie, MovieCreateResponseModel>();
-        
+        CreateMap<Movie, MovieDetailsModel>().AfterMap<MapMovieAndMovieDetailsModel>();
+        CreateMap<Movie, MovieElementModel>().AfterMap<MapMovieAndMovieElementModel>();
+
         // Countries
         CreateMap<CountryCreateModel, Country>();
         CreateMap<CountryUpdateModel, Country>();
-        
+
         // Reviews
         CreateMap<ReviewCreateModel, Review>();
         CreateMap<ReviewUpdateModel, Review>().IgnoreNullProperties();
         CreateMap<Review, ReviewModel>().AfterMap<MapReviewAndReviewModelAction>();
+        CreateMap<Review, ReviewShortModel>();
+
+        // Genres
+        CreateMap<Genre, GenreModel>();
     }
 }
 
@@ -49,10 +56,24 @@ public class MapReviewAndReviewModelAction : IMappingAction<Review, ReviewModel>
     }
 }
 
+public class MapMovieAndMovieDetailsModel : IMappingAction<Movie, MovieDetailsModel> {
+    public void Process(Movie source, MovieDetailsModel destination, ResolutionContext context) {
+        context.Mapper.Map(source.Reviews, destination.Reviews);
+        context.Mapper.Map(source.Genres, destination.Genres);
+    }
+}
+
+public class MapMovieAndMovieElementModel : IMappingAction<Movie, MovieElementModel> {
+    public void Process(Movie source, MovieElementModel destination, ResolutionContext context) {
+        context.Mapper.Map(source.Reviews, destination.Reviews);
+        context.Mapper.Map(source.Genres, destination.Genres);
+    }
+}
+
 public static class MappingExpressionExtension {
     public static void IgnoreNullProperties<TDestination, TSource>(
         this IMappingExpression<TDestination, TSource> expression) {
         expression.ForAllMembers(options =>
-            options.Condition((src, dest, srcMember) => srcMember != null));
+            options.Condition((_, _, srcMember) => srcMember != null));
     }
 }

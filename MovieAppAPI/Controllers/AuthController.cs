@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MovieAppAPI.Exceptions;
 using MovieAppAPI.Models.Auth;
-using MovieAppAPI.Services;
 using MovieAppAPI.Services.Auth;
 
 namespace MovieAppAPI.Controllers;
@@ -38,7 +37,7 @@ public class AuthController : ControllerBase {
     public async Task<IActionResult> Login(UserLoginModel loginModel) {
         try {
             var token = await _authService.Login(loginModel);
-            var response = new { token = token };
+            var response = new { token };
             return Ok(response);
         }
         catch (ObjectsAreNotEqual e) {

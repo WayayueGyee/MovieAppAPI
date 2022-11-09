@@ -35,6 +35,7 @@ public class ReviewService : IReviewService {
     }
 
     public async Task<ReviewModel?> GetById(Guid id) {
+        // WARNING: Не факт, что это работает, так как здесь нет Include
         var review = await _context.Reviews.FindAsync(id);
         var reviewModel = _mapper.Map<ReviewModel>(review);
         return reviewModel;
@@ -70,11 +71,15 @@ public class ReviewService : IReviewService {
     }
 
     /// <exception cref="RecordNotFoundException"></exception>
-    public async Task Update(Guid movieId, Guid reviewId, ReviewUpdateModel reviewUpdateModel) {
+    public async Task Update(Guid movieId, Guid reviewId, Guid userId, ReviewUpdateModel reviewUpdateModel) {
         var dbReview = await _context.Reviews.FindAsync(reviewId);
 
         if (dbReview is null) {
             throw ExceptionHelper.ReviewNotFoundException(id: reviewId.ToString());
+        }
+
+        if (dbReview.Author.Id != userId) {
+            throw ExceptionHelper.PermissionsDeniedException();
         }
 
         var updatedReview = _mapper.Map(reviewUpdateModel, dbReview);

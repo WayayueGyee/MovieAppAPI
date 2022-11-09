@@ -1,9 +1,7 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Exceptions;
-using MovieAppAPI.Helpers;
 using MovieAppAPI.Models.Reviews;
 using MovieAppAPI.Services.Reviews;
 using Npgsql;
@@ -13,20 +11,13 @@ namespace MovieAppAPI.Controllers;
 [Route("api/movie")]
 [ApiController]
 [Authorize("TokenNotRejected")]
-public class ReviewController : ControllerBase {
+public class ReviewController : ControllerExtractToken {
     private readonly IReviewService _reviewService;
     private readonly ILogger<ReviewController> _logger;
-
+    
     public ReviewController(IReviewService reviewService, ILogger<ReviewController> logger) {
         _reviewService = reviewService;
         _logger = logger;
-    }
-
-    private string? GetUserIdFromToken() {
-        var id = User.Claims.FirstOrDefault(claim =>
-                claim.Type == ClaimTypes.NameIdentifier)
-            ?.Value;
-        return id;
     }
 
     [HttpGet("/api/review")]
@@ -62,13 +53,12 @@ public class ReviewController : ControllerBase {
     public async Task<ActionResult<ReviewModel>> CreateReview(Guid movieId, ReviewCreateModel reviewCreateModel) {
         try {
             var userId = GetUserIdFromToken();
-
-            if (userId is null) {
-                throw ExceptionHelper.InvalidTokenException("Token has invalid claim type");
-            }
-
-            var review = await _reviewService.Create(movieId.ToString(), userId, reviewCreateModel);
+            var review = await _reviewService.Create(movieId.ToString(), userId.ToString(), reviewCreateModel);
             return Created($"~api/review/{review.Id.ToString()}", review);
+        }
+        catch (RecordNotFoundException e) {
+            _logger.LogError("{E}", e.StackTrace);
+            return NotFound(e.Message);
         }
         catch (InvalidTokenException e) {
             _logger.LogError("{E}", e.Message);
@@ -101,10 +91,12 @@ public class ReviewController : ControllerBase {
     }
 
     [HttpPut("{movieId:guid}/review/{id:guid}/edit")]
+    [Authorize]
     public async Task<IActionResult> UpdateReviewByMovieIdAndReviewId(Guid movieId, Guid id,
         ReviewUpdateModel reviewUpdateModel) {
         try {
-            await _reviewService.Update(movieId, id, reviewUpdateModel);
+            var userId = GetUserIdFromToken();
+            await _reviewService.Update(movieId, id, userId, reviewUpdateModel);
             return NoContent();
         }
         catch (RecordNotFoundException e) {

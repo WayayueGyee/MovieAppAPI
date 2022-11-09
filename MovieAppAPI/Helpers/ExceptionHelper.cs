@@ -44,6 +44,16 @@ public static class ExceptionHelper {
         return new AlreadyExistsException($"Movie with id '{id}' is already exists");
     }
 
+    public static AlreadyExistsException FavoriteMovieAlreadyExistsException(string movieId, string userId) {
+        return new AlreadyExistsException(
+            $"Movie with id '{movieId}' has already been added to the user with id '{userId}'");
+    }
+
+    public static RecordNotFoundException FavoriteMovieNotFoundException(string movieId, string userId) {
+        return new RecordNotFoundException(
+            $"User with id '{userId}' doesn't have movie with id '{movieId}'");
+    }
+
     public static RecordNotFoundException MovieNotFoundException(string id) {
         return new RecordNotFoundException($"Movie with id '{id}' not found");
     }
@@ -70,5 +80,9 @@ public static class ExceptionHelper {
         var message = string.Join(" and ", idMessage, movieIdMessage, userIdMessage);
 
         return new RecordNotFoundException($"Review with {message} not found");
+    }
+
+    public static PermissionsDeniedException PermissionsDeniedException() {
+        return new PermissionsDeniedException();
     }
 }

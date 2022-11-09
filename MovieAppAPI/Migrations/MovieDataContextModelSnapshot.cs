@@ -72,6 +72,21 @@ namespace MovieAppAPI.Migrations
                     b.ToTable("country");
                 });
 
+            modelBuilder.Entity("MovieAppAPI.Entities.FavoriteMovie", b =>
+                {
+                    b.Property<Guid>("MovieId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("MovieId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("favorite_movies");
+                });
+
             modelBuilder.Entity("MovieAppAPI.Entities.Genre", b =>
                 {
                     b.Property<Guid>("Id")
@@ -228,6 +243,25 @@ namespace MovieAppAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MovieAppAPI.Entities.FavoriteMovie", b =>
+                {
+                    b.HasOne("MovieAppAPI.Entities.Movie", "Movie")
+                        .WithMany("FavoriteMovies")
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MovieAppAPI.Entities.Users.User", "User")
+                        .WithMany("FavoriteMovies")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Movie");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MovieAppAPI.Entities.Movie", b =>
                 {
                     b.HasOne("MovieAppAPI.Entities.Country", "Country")
@@ -258,7 +292,14 @@ namespace MovieAppAPI.Migrations
 
             modelBuilder.Entity("MovieAppAPI.Entities.Movie", b =>
                 {
+                    b.Navigation("FavoriteMovies");
+
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("MovieAppAPI.Entities.Users.User", b =>
+                {
+                    b.Navigation("FavoriteMovies");
                 });
 #pragma warning restore 612, 618
         }

@@ -61,7 +61,7 @@ public class UserController : ControllerBase {
         catch (RecordNotFoundException e) {
             return NotFound(e.Message);
         }
-        catch (DbUpdateException e) {
+        catch (DbUpdateException) {
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
@@ -75,7 +75,7 @@ public class UserController : ControllerBase {
         catch (RecordNotFoundException e) {
             return NotFound(e.Message);
         }
-        catch (DbUpdateException e) {
+        catch (DbUpdateException) {
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
@@ -89,7 +89,7 @@ public class UserController : ControllerBase {
         catch (RecordNotFoundException e) {
             return NotFound(e.Message);
         }
-        catch (DbUpdateException e) {
+        catch (DbUpdateException) {
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
