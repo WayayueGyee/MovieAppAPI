@@ -11,7 +11,7 @@ public class ControllerExtractToken : ControllerBase {
         var id = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
 
         if (id is null) {
-            throw ExceptionHelper.InvalidTokenException("Token has invalid claim type");
+            throw ExceptionHelper.InvalidTokenException("Token doesn't have valid claim type");
         }
         
         return Guid.Parse(id);

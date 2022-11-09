@@ -5,7 +5,6 @@ using MovieAppAPI.Helpers;
 using MovieAppAPI.Models.Auth;
 using MovieAppAPI.Models.Users;
 using MovieAppAPI.Services.Users;
-using MovieAppAPI.Utils;
 
 namespace MovieAppAPI.Services.Auth;
 
@@ -45,20 +44,20 @@ public class AuthService : IAuthService {
 
     /// <exception cref="ObjectsAreNotEqual"></exception>
     /// <exception cref="RecordNotFoundException"></exception>
-    public Task<string> Login(UserLoginModel loginModel) {
-        var user = _userService.GetByUserName(loginModel.UserName);
+    public async Task<string> Login(UserLoginModel loginModel) {
+        var user = await _userService.GetByUserName(loginModel.UserName);
 
         if (user is null) {
             throw ExceptionHelper.UserNotFoundException(userName: loginModel.UserName);
         }
 
-        if (Hashing.ComputeSha256Hash(loginModel.Password) != user.PasswordHash) {
+        if (HashingHelper.ComputeSha256Hash(loginModel.Password) != user.PasswordHash) {
             throw ExceptionHelper.PasswordsDoNotMatch();
         }
 
         var token = _tokenService.GenerateToken(user.Id.ToString());
 
-        return Task.FromResult(token);
+        return token;
     }
 
     public async Task Logout(string stringToken) {

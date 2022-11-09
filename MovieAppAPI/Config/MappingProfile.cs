@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.Win32;
 using MovieAppAPI.Entities;
 using MovieAppAPI.Entities.Auth;
 using MovieAppAPI.Entities.Users;
@@ -13,6 +14,13 @@ namespace MovieAppAPI.Config;
 
 public class MappingProfile : Profile {
     public MappingProfile() {
+        // Disable Null
+        CreateMap<int?, int>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<string?, string>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<DateTime?, DateTime>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<TimeSpan?, TimeSpan>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<Guid?, Guid>().ConvertUsing((src, dest) => src ?? dest);
+
         // User
         CreateMap<User, UserCreateModel>()
             // .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate))
@@ -27,6 +35,10 @@ public class MappingProfile : Profile {
         // Auth
         CreateMap<UserRegisterModel, UserCreateModel>();
         CreateMap<UserLogoutModel, InvalidToken>();
+
+        // Account
+        CreateMap<User, ProfileModel>();
+        CreateMap<ProfileUpdateModel, User>().IgnoreNullProperties();
 
         // Movies
         CreateMap<MovieCreateModel, Movie>();

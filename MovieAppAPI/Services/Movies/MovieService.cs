@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using MovieAppAPI.Data;
 using MovieAppAPI.Entities;
 using MovieAppAPI.Exceptions;
@@ -27,7 +28,8 @@ public class MovieService : IMovieService {
     private int FilmsCount => _context.Movies.Count();
     private int TotalPages => (int)Math.Ceiling(FilmsCount / (double)PageSize);
     private int LastPage { get; set; }
-    private string LastId { get; set; }
+    private Guid? _lastPageLastId;
+    private Guid? _lastPageFirstId;
 
     public async Task<IEnumerable<Movie>?> GetAll() {
         return await _context.Movies.ToListAsync();
@@ -50,13 +52,43 @@ public class MovieService : IMovieService {
         return movie;
     }
 
-    public async Task<MoviePagedListModel?> GetPage(int currentPage) {
-        if (currentPage > TotalPages) {
+    private async Task<List<MovieElementModel>?> GetNeighboringPage(int requestedPage) {
+        if (_lastPageFirstId is null || _lastPageLastId is null) {
             return null;
         }
 
-        var moviesToSkip = PageSize * (currentPage - 1);
-        
+        List<MovieElementModel> nextPage;
+
+        if (LastPage > requestedPage) {
+            nextPage = await _context.Movies
+                .OrderBy(movie => movie.Id)
+                .Where(movie => movie.Id.IsGreaterThan((Guid)_lastPageLastId))
+                .Take(PageSize)
+                .Include(movie => movie.Reviews)
+                .Include(movie => movie.Genres)
+                .Select(movie => _mapper.Map<MovieElementModel>(movie))
+                .ToListAsync();
+        }
+        else {
+            nextPage = await _context.Movies
+                .OrderBy(movie => movie.Id)
+                .Where(movie => movie.Id.IsLessThan((Guid)_lastPageFirstId!))
+                .Take(PageSize)
+                .Include(movie => movie.Reviews)
+                .Include(movie => movie.Genres)
+                .Select(movie => _mapper.Map<MovieElementModel>(movie))
+                .ToListAsync();
+        }
+
+        _lastPageFirstId = nextPage[0].Id;
+        _lastPageLastId = nextPage[^1].Id;
+
+        return nextPage;
+    }
+
+    private async Task<List<MovieElementModel>?> GetRandomPage(int requestedPage) {
+        var moviesToSkip = PageSize * (requestedPage - 1);
+
         var nextPage = await _context.Movies
             .OrderBy(movie => movie.Id)
             .Skip(moviesToSkip)
@@ -65,7 +97,29 @@ public class MovieService : IMovieService {
             .Include(movie => movie.Genres)
             .Select(movie => _mapper.Map<MovieElementModel>(movie))
             .ToListAsync();
-        var pageInfo = new PageInfoModel { PageSize = PageSize, CurrentPage = currentPage, TotalPages = TotalPages };
+
+        _lastPageFirstId = nextPage[0].Id;
+        _lastPageLastId = nextPage[^1].Id;
+
+        return nextPage;
+    }
+
+    public async Task<MoviePagedListModel?> GetPage(int requestedPage) {
+        if (requestedPage > TotalPages) {
+            return null;
+        }
+
+        List<MovieElementModel>? nextPage;
+
+        if (Math.Abs(LastPage - requestedPage) == 1 && _lastPageFirstId is not null) {
+            nextPage = await GetNeighboringPage(requestedPage);
+        }
+        else {
+            nextPage = await GetRandomPage(requestedPage);
+        }
+
+        var pageInfo = new PageInfoModel
+            { PageSize = PageSize, CurrentPage = requestedPage, TotalPages = TotalPages };
 
         return new MoviePagedListModel(pageInfo, nextPage);
     }

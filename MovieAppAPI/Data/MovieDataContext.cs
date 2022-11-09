@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Entities;
 using MovieAppAPI.Entities.Auth;
 using MovieAppAPI.Entities.Users;
+using MovieAppAPI.Helpers;
 
 namespace MovieAppAPI.Data;
 
@@ -9,6 +10,8 @@ public class MovieDataContext : DbContext {
     public MovieDataContext(DbContextOptions<MovieDataContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
+        GuidExtension.Register(modelBuilder);
+
         modelBuilder.Entity<FavoriteMovie>()
             .HasKey(t => new { t.MovieId, t.UserId });
 

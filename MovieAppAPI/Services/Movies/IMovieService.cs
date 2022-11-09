@@ -8,7 +8,7 @@ public interface IMovieService {
     Task<IEnumerable<Movie>?> GetAll();
     Task<Movie?> GetById(Guid id);
     Task<MovieDetailsModel?> GetMovieDetails(Guid id);
-    Task<MoviePagedListModel?> GetPage(int currentPage);
+    Task<MoviePagedListModel?> GetPage(int requestedPage);
     Task<MovieCreateResponseModel> Create(MovieCreateModel movieCreateModel);
 
     /// <exception cref="RecordNotFoundException"></exception>

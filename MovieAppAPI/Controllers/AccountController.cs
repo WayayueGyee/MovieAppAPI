@@ -1,19 +1,26 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Exceptions;
 using MovieAppAPI.Models.Auth;
+using MovieAppAPI.Models.Users;
 using MovieAppAPI.Services.Auth;
+using MovieAppAPI.Services.Users;
 
 namespace MovieAppAPI.Controllers;
 
 [Route("api/account/")]
 [Produces("application/json")]
 [ApiController]
-public class AuthController : ControllerBase {
+public class AccountController : ControllerExtractToken {
     private readonly IAuthService _authService;
+    private readonly IUserService _userService;
+    private readonly ILogger<AccountController> _logger;
 
-    public AuthController(IAuthService authService) {
+    public AccountController(IAuthService authService, IUserService userService, ILogger<AccountController> logger) {
         _authService = authService;
+        _userService = userService;
+        _logger = logger;
     }
 
     [HttpPost("register")]
@@ -65,6 +72,41 @@ public class AuthController : ControllerBase {
         }
         catch (Exception e) {
             return BadRequest(e.Message);
+        }
+    }
+
+    [HttpGet("profile")]
+    [Authorize("TokenNotRejected")]
+    public async Task<ActionResult<ProfileModel>> GetProfile() {
+        try {
+            var id = GetUserIdFromToken();
+            var profile = await _userService.GetProfile(id);
+            return Ok(profile);
+        }
+        catch (InvalidTokenException e) {
+            _logger.LogInformation("{E}", e.Message);
+            return Unauthorized();
+        }
+    }
+
+    [HttpPut("profile")]
+    public async Task<IActionResult> UpdateProfile(ProfileUpdateModel profileModel) {
+        try {
+            var id = GetUserIdFromToken();
+            await _userService.UpdateProfile(id, profileModel);
+            return NoContent();
+        }
+        catch (InvalidTokenException e) {
+            _logger.LogInformation("{E}", e.Message);
+            return Unauthorized();
+        }
+        catch (RecordNotFoundException e) {
+            _logger.LogError("{E}", e.StackTrace);
+            return NotFound(e.Message);
+        }
+        catch (DbUpdateConcurrencyException e) {
+            _logger.LogError("{E}", e.StackTrace);
+            return BadRequest();
         }
     }
 }

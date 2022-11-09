@@ -19,6 +19,8 @@ public class UserController : ControllerBase {
         _userService = userService;
         _logger = logger;
     }
+    
+    
 
     [HttpGet]
     public IActionResult GetAll() {

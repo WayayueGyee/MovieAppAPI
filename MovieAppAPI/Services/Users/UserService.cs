@@ -2,9 +2,9 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Data;
 using MovieAppAPI.Entities.Users;
+using MovieAppAPI.Exceptions;
 using MovieAppAPI.Helpers;
 using MovieAppAPI.Models.Users;
-using MovieAppAPI.Utils;
 
 namespace MovieAppAPI.Services.Users;
 
@@ -21,8 +21,8 @@ public class UserService : IUserService {
         return await _context.Users.AnyAsync(user => user.Email == newUser.Email || user.UserName == newUser.UserName);
     }
 
-    private async Task<bool> IsUserExists(UserUpdateModel newUser) {
-        return await _context.Users.AnyAsync(user => user.Email == newUser.Email || user.UserName == newUser.UserName);
+    private async Task<bool> IsUserExists(string? email, string? userName) {
+        return await _context.Users.AnyAsync(user => user.Email == email || user.UserName == userName);
     }
 
     public async Task<bool> IsUserExists(Guid id) {
@@ -42,14 +42,38 @@ public class UserService : IUserService {
         return user;
     }
 
-    public User GetByEmail(string email) {
-        var user = _context.Users.Where(u => u.Email == email).ToList()[0];
+    public async Task<User?> GetByEmail(string email) {
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
         return user;
     }
 
-    public User GetByUserName(string userName) {
-        var user = _context.Users.Where(u => u.Email == userName).ToList()[0];
+    public async Task<User?> GetByUserName(string userName) {
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == userName);
         return user;
+    }
+
+    public async Task<ProfileModel> GetProfile(Guid id) {
+        var user = await _context.Users.FindAsync(id);
+        var profile = _mapper.Map<ProfileModel>(user);
+        return profile;
+    }
+
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task UpdateProfile(Guid id, ProfileUpdateModel profileModel) {
+        var isExists = await IsUserExists(profileModel.Email, profileModel.UserName);
+        if (isExists) {
+            throw ExceptionHelper.UserAlreadyExistsException(profileModel.Email, profileModel.UserName);
+        }
+
+        var dbUser = await _context.Users.FindAsync(id);
+
+        if (dbUser is null) {
+            throw ExceptionHelper.UserNotFoundException(id.ToString());
+        }
+
+        var updatedUser = _mapper.Map(profileModel, dbUser);
+        _context.Users.Update(updatedUser);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<User> Create(UserCreateModel user) {
@@ -60,7 +84,7 @@ public class UserService : IUserService {
 
         var newUser = _mapper.Map<User>(user);
 
-        newUser.PasswordHash = Hashing.ComputeSha256Hash(user.Password);
+        newUser.PasswordHash = HashingHelper.ComputeSha256Hash(user.Password);
 
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();

@@ -62,7 +62,7 @@ public class ReviewController : ControllerExtractToken {
         }
         catch (InvalidTokenException e) {
             _logger.LogError("{E}", e.Message);
-            return BadRequest();
+            return Unauthorized();
         }
         catch (DbUpdateConcurrencyException e) {
             _logger.LogError("{E}", e.StackTrace);
