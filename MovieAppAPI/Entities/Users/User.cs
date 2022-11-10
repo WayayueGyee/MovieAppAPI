@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using MovieAppAPI.Models.Users;
 
 namespace MovieAppAPI.Entities.Users;
 
@@ -16,7 +17,7 @@ public class User {
     [JsonIgnore] [Required] public string PasswordHash { get; set; }
     [EmailAddress] [Required] public string Email { get; set; }
     public DateTime? BirthDate { get; set; }
-    public Gender Gender { get; set; }
+    public Gender? Gender { get; set; }
     public string? Avatar { get; set; }
     public Role Role { get; set; } = Role.User;
 
@@ -48,5 +49,13 @@ public class User {
         UserName = "";
         PasswordHash = "";
         Email = "";
+    }
+
+    public static explicit operator User(UserShortModel userShortModel) {
+        return new User {
+            Id = userShortModel.Id,
+            Avatar = userShortModel.Avatar,
+            UserName = userShortModel.UserName ?? "simple"
+        };
     }
 }

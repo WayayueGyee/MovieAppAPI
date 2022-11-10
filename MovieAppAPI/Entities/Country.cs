@@ -6,17 +6,7 @@ namespace MovieAppAPI.Entities;
 
 [Table("country")]
 [Index("CountryName", IsUnique = true)]
-public class Country {
-    public Country() {
-        Id = Guid.Empty;
-        CountryName = "";
-    }
-
-    public Country(Guid id) {
-        Id = id;
-        CountryName = "";
-    }
-
+public class Country { 
     [Key] public Guid Id { get; set; }
     public string CountryName { get; set; }
 }

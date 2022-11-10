@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
@@ -8,7 +10,6 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using MovieAppAPI.Config;
 using MovieAppAPI.Data;
-using MovieAppAPI.Entities;
 using MovieAppAPI.Middlewares;
 using MovieAppAPI.Services.Auth;
 using MovieAppAPI.Services.Countries;
@@ -19,6 +20,11 @@ using MovieAppAPI.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
+
+Assembly assembly = Assembly.GetExecutingAssembly();
+FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+Console.WriteLine(fileVersionInfo.ProductVersion);
+
 
 services.AddDbContext<MovieDataContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection") ??

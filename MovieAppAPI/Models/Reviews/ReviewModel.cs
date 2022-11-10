@@ -20,5 +20,5 @@ public class ReviewModel {
     public string? ReviewText { get; set; }
     public bool IsAnonymous { get; set; }
     public DateTime CreateDateTime { get; set; }
-    public UserShortModel Author { get; set; }
+    public UserShortModel? Author { get; set; }
 }

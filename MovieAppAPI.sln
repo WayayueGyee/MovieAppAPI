@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieAppAPI", "MovieAppAPI\MovieAppAPI.csproj", "{5F37B2CF-10FF-4768-B67E-6A905CBDB84E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseFill", "DatabaseFill\DatabaseFill.csproj", "{C5C38987-DD06-4019-B0C5-6D98BD0BF199}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{5F37B2CF-10FF-4768-B67E-6A905CBDB84E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F37B2CF-10FF-4768-B67E-6A905CBDB84E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F37B2CF-10FF-4768-B67E-6A905CBDB84E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5C38987-DD06-4019-B0C5-6D98BD0BF199}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5C38987-DD06-4019-B0C5-6D98BD0BF199}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5C38987-DD06-4019-B0C5-6D98BD0BF199}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5C38987-DD06-4019-B0C5-6D98BD0BF199}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

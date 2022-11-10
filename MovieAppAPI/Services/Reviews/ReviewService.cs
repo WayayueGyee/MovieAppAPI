@@ -78,7 +78,7 @@ public class ReviewService : IReviewService {
             throw ExceptionHelper.ReviewNotFoundException(id: reviewId.ToString());
         }
 
-        if (dbReview.Author.Id != userId) {
+        if (dbReview.Author?.Id != userId) {
             throw ExceptionHelper.PermissionsDeniedException();
         }
 

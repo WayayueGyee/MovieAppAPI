@@ -52,7 +52,7 @@ public class CountryService : ICountryService {
 
         return newCountry;
     }
-    
+
     /// <exception cref="AlreadyExistsException"></exception>
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task Update(Guid id, CountryUpdateModel countryUpdateModel) {
@@ -79,7 +79,7 @@ public class CountryService : ICountryService {
             throw ExceptionHelper.CountryNotFoundException(id.ToString());
         }
 
-        var country = new Country(id);
+        var country = new Country { Id = id };
         _context.Countries.Remove(country);
         await _context.SaveChangesAsync();
     }

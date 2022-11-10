@@ -34,7 +34,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasIndex("MoviesId");
 
-                    b.ToTable("GenreMovie");
+                    b.ToTable("GenreMovie", (string)null);
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Auth.InvalidToken", b =>
@@ -51,7 +51,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("invalid_token");
+                    b.ToTable("invalid_token", (string)null);
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Country", b =>
@@ -69,7 +69,7 @@ namespace MovieAppAPI.Migrations
                     b.HasIndex("CountryName")
                         .IsUnique();
 
-                    b.ToTable("country");
+                    b.ToTable("country", (string)null);
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.FavoriteMovie", b =>
@@ -84,7 +84,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("favorite_movies");
+                    b.ToTable("favorite_movies", (string)null);
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Genre", b =>
@@ -99,7 +99,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("genre");
+                    b.ToTable("genre", (string)null);
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Movie", b =>
@@ -135,8 +135,8 @@ namespace MovieAppAPI.Migrations
                     b.Property<string>("Tagline")
                         .HasColumnType("text");
 
-                    b.Property<TimeSpan>("Time")
-                        .HasColumnType("interval");
+                    b.Property<int>("Time")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Year")
                         .HasColumnType("integer");
@@ -145,7 +145,22 @@ namespace MovieAppAPI.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("movie");
+                    b.ToTable("movie", (string)null);
+                });
+
+            modelBuilder.Entity("MovieAppAPI.Entities.MovieGenre", b =>
+                {
+                    b.Property<Guid>("MovieId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GenreId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("MovieId", "GenreId");
+
+                    b.HasIndex("GenreId");
+
+                    b.ToTable("movie_genre", (string)null);
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Review", b =>
@@ -180,7 +195,7 @@ namespace MovieAppAPI.Migrations
                     b.HasIndex("MovieId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("review");
+                    b.ToTable("review", (string)null);
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Users.User", b =>
@@ -225,7 +240,7 @@ namespace MovieAppAPI.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("user");
+                    b.ToTable("user", (string)null);
                 });
 
             modelBuilder.Entity("GenreMovie", b =>
@@ -271,6 +286,25 @@ namespace MovieAppAPI.Migrations
                     b.Navigation("Country");
                 });
 
+            modelBuilder.Entity("MovieAppAPI.Entities.MovieGenre", b =>
+                {
+                    b.HasOne("MovieAppAPI.Entities.Genre", "Genre")
+                        .WithMany("MovieGenres")
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MovieAppAPI.Entities.Movie", "Movie")
+                        .WithMany("MovieGenres")
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Genre");
+
+                    b.Navigation("Movie");
+                });
+
             modelBuilder.Entity("MovieAppAPI.Entities.Review", b =>
                 {
                     b.HasOne("MovieAppAPI.Entities.Movie", "Movie")
@@ -290,9 +324,16 @@ namespace MovieAppAPI.Migrations
                     b.Navigation("Movie");
                 });
 
+            modelBuilder.Entity("MovieAppAPI.Entities.Genre", b =>
+                {
+                    b.Navigation("MovieGenres");
+                });
+
             modelBuilder.Entity("MovieAppAPI.Entities.Movie", b =>
                 {
                     b.Navigation("FavoriteMovies");
+
+                    b.Navigation("MovieGenres");
 
                     b.Navigation("Reviews");
                 });
