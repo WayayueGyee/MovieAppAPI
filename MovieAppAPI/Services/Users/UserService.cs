@@ -48,12 +48,15 @@ public class UserService : IUserService {
     }
 
     public async Task<User?> GetByUserName(string userName) {
-        var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == userName);
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.UserName == userName);
         return user;
     }
 
-    public async Task<ProfileModel> GetProfile(Guid id) {
+    public async Task<ProfileModel?> GetProfile(Guid id) {
         var user = await _context.Users.FindAsync(id);
+
+        if (user is null) return null;
+        
         var profile = _mapper.Map<ProfileModel>(user);
         return profile;
     }
@@ -112,8 +115,7 @@ public class UserService : IUserService {
     }
 
     public async Task Delete(Guid id) {
-        var isExists = await IsUserExists(id);
-        if (!isExists) {
+        if (await IsUserExists(id)) {
             throw ExceptionHelper.UserNotFoundException(id: id.ToString());
         }
 

@@ -25,17 +25,12 @@ public class TokenService : ITokenService {
     }
 
     public async Task<bool> IsTokenValid(string stringToken) {
-        var dbToken = await _context.ValidTokens.FirstOrDefaultAsync(token => token.Token == stringToken);
-        if (dbToken is null) {
-            return true;
-        }
-
-        var jwt = new JwtSecurityToken(dbToken.Token);
-        return !IsTokenExpired(jwt);
+        var dbToken = await _context.ValidTokens.SingleOrDefaultAsync(token => token.Token == stringToken);
+        return dbToken is null;
     }
 
     private static bool IsTokenExpired(JwtSecurityToken jwt) {
-        return DateTime.Now > jwt.ValidTo;
+        return DateTime.UtcNow > jwt.ValidTo;
     }
 
     public async Task<bool> Delete(InvalidToken token) {

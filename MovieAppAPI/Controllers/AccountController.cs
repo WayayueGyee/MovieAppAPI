@@ -27,7 +27,7 @@ public class AccountController : ControllerExtractToken {
     public async Task<IActionResult> Register(UserRegisterModel registerModel) {
         try {
             var response = await _authService.Register(registerModel);
-            return Created($"~/api/user/{response.Id}", response.Token);
+            return Created($"~/api/user/{response.Id}", new { response.Token });
         }
         catch (ObjectsAreNotEqual e) {
             return Unauthorized(e.Message);
@@ -38,6 +38,7 @@ public class AccountController : ControllerExtractToken {
         catch (RecordNotFoundException e) {
             return NotFound(e.Message);
         }
+        // WARNING: Catch Exception at the end
     }
 
     [HttpPost("login")]
@@ -81,7 +82,11 @@ public class AccountController : ControllerExtractToken {
         try {
             var id = GetUserIdFromToken();
             var profile = await _userService.GetProfile(id);
-            return Ok(profile);
+
+            if (profile is not null) return Ok(profile);
+
+            _logger.LogInformation("User with id {Id} not found", id.ToString());
+            return NotFound();
         }
         catch (InvalidTokenException e) {
             _logger.LogInformation("{E}", e.Message);
@@ -90,6 +95,7 @@ public class AccountController : ControllerExtractToken {
     }
 
     [HttpPut("profile")]
+    [Authorize("TokenNotRejected")]
     public async Task<IActionResult> UpdateProfile(ProfileUpdateModel profileModel) {
         try {
             var id = GetUserIdFromToken();

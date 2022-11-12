@@ -1,6 +1,5 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using MovieAppAPI.Data;
 using MovieAppAPI.Entities;
 using MovieAppAPI.Exceptions;
@@ -28,6 +27,7 @@ public class MovieService : IMovieService {
     private int FilmsCount => _context.Movies.Count();
     private int TotalPages => (int)Math.Ceiling(FilmsCount / (double)PageSize);
     private int LastPage { get; set; }
+    // TODO: Double check locking
     private Guid? _lastPageLastId;
     private Guid? _lastPageFirstId;
 
@@ -36,8 +36,9 @@ public class MovieService : IMovieService {
     }
 
     public async Task<MovieDetailsModel?> GetMovieDetails(Guid id) {
-        // TODO: SingleOrDefaultAsync or Where???
-        var movie = await _context.Movies.Include(movie => movie.Genres).Include(movie => movie.Reviews)
+        var movie = await _context.Movies
+            .Include(movie => movie.Genres)
+            .Include(movie => movie.Reviews)
             .ThenInclude(review => review.Author)
             .SingleOrDefaultAsync(movie => movie.Id == id);
 

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieAppAPI.Entities;
@@ -32,6 +33,7 @@ public class CountryController : ControllerBase {
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize("TokenNotRejected")]
     public async Task<ActionResult<Country>> GetById(Guid id) {
         var country = await _countryService.GetById(id);
         if (country is null) {
@@ -44,6 +46,7 @@ public class CountryController : ControllerBase {
     }
 
     [HttpPost]
+    [Authorize("TokenNotRejected")]
     public async Task<IActionResult> CreateCountry(CountryCreateModel countryCreateModel) {
         try {
             var country = await _countryService.Create(countryCreateModel);
@@ -56,7 +59,8 @@ public class CountryController : ControllerBase {
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateMovie(Guid id, CountryUpdateModel countryUpdateModel) {
+    [Authorize("TokenNotRejected")]
+    public async Task<IActionResult> UpdateCountry(Guid id, CountryUpdateModel countryUpdateModel) {
         try {
             await _countryService.Update(id, countryUpdateModel);
             return NoContent();
@@ -76,6 +80,7 @@ public class CountryController : ControllerBase {
     } 
 
     [HttpDelete("{id:guid}")]
+    [Authorize("TokenNotRejected")]
     public async Task<IActionResult> DeleteMovie(Guid id) {
         try {
             await _countryService.Delete(id);

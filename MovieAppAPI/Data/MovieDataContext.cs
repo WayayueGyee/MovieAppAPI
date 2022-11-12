@@ -3,7 +3,6 @@ using MovieAppAPI.Entities;
 using MovieAppAPI.Entities.Auth;
 using MovieAppAPI.Entities.Users;
 using MovieAppAPI.Helpers;
-using MovieAppAPI.Models.Pagination;
 
 namespace MovieAppAPI.Data;
 
@@ -26,23 +25,20 @@ public class MovieDataContext : DbContext {
 
         modelBuilder.Entity<MovieGenre>()
             .HasKey(t => new { t.MovieId, t.GenreId });
-        modelBuilder.Entity<MovieGenre>()
-            .HasOne(mg => mg.Movie)
-            .WithMany(m => m.MovieGenres)
-            .HasForeignKey(mg => mg.MovieId);
-        modelBuilder.Entity<MovieGenre>()
-            .HasOne(mg => mg.Genre)
-            .WithMany(g => g.MovieGenres)
-            .HasForeignKey(mg => mg.GenreId);
+        modelBuilder.Entity<Movie>()
+            .HasMany(m => m.Genres)
+            .WithMany(g => g.Movies)
+            .UsingEntity<MovieGenre>();
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
         if (optionsBuilder.IsConfigured) return;
 
         optionsBuilder.EnableSensitiveDataLogging();
-        
+
         var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetDirectoryRoot("/home/vladovello/VSCodeProjects/MovieAppAPI/MovieAppAPI/Program.cs"))
+            .SetBasePath(
+                Directory.GetDirectoryRoot("/home/vladovello/VSCodeProjects/MovieAppAPI/MovieAppAPI/Program.cs"))
             .AddJsonFile("/home/vladovello/VSCodeProjects/MovieAppAPI/DatabaseFill/appsettings.json")
             .Build();
         var connectionString = configuration.GetConnectionString("DefaultConnection");

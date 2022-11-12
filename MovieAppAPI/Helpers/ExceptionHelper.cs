@@ -14,8 +14,9 @@ public static class ExceptionHelper {
         var idMessage = id is not null ? $"id '{id}'" : "";
         var emailMessage = email is not null ? $"email '{email}'" : "";
         var userNameMessage = userName is not null ? $"user name '{userName}'" : "";
+        var arr = new[] { idMessage, emailMessage, userNameMessage };
 
-        var message = string.Join(" and ", idMessage, emailMessage, userNameMessage);
+        var message = string.Join(" and ", arr.Where(s => !string.IsNullOrEmpty(s)));
 
         return new RecordNotFoundException($"User with{message}not found");
     }
@@ -33,7 +34,7 @@ public static class ExceptionHelper {
             return new AlreadyExistsException($"User with email '{email}' already exists");
         }
 
-        return new AlreadyExistsException($"User with email '{email}' already exists");
+        return new AlreadyExistsException($"User with email '{email}' or username '{username}' already exists");
     }
 
     public static ObjectsAreNotEqual PasswordsDoNotMatch() {
@@ -65,8 +66,9 @@ public static class ExceptionHelper {
     public static RecordNotFoundException CountryNotFoundException(string? id = null, string? name = null) {
         var idMessage = id is null ? $"id '{id}'" : "";
         var nameMessage = name is null ? $"name '{name}'" : "";
+        var arr = new[] { idMessage, nameMessage };
 
-        var message = string.Join(" and ", idMessage, nameMessage);
+        var message = string.Join(" and ", arr.Where(s => !string.IsNullOrEmpty(s)));
 
         return new RecordNotFoundException($"Country with {message} not found");
     }
@@ -76,8 +78,9 @@ public static class ExceptionHelper {
         var idMessage = id is null ? $"id '{id}'" : "";
         var movieIdMessage = movieId is null ? $"movie id '{movieId}'" : "";
         var userIdMessage = userId is null ? $"user id '{userId}'" : "";
+        var arr = new[] { idMessage, movieIdMessage, userIdMessage };
 
-        var message = string.Join(" and ", idMessage, movieIdMessage, userIdMessage);
+        var message = string.Join(" and ", arr.Where(s => !string.IsNullOrEmpty(s)));
 
         return new RecordNotFoundException($"Review with {message} not found");
     }

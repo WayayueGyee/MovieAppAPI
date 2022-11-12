@@ -9,7 +9,7 @@ public interface IUserService {
     Task<User?> GetById(Guid id);
     Task<User?> GetByEmail(string email);
     Task<User?> GetByUserName(string userName);
-    Task<ProfileModel> GetProfile(Guid id);
+    Task<ProfileModel?> GetProfile(Guid id);
 
     /// <exception cref="RecordNotFoundException"></exception>
     Task UpdateProfile(Guid id, ProfileUpdateModel profileModel);

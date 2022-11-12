@@ -23,18 +23,6 @@ public class User {
 
     public List<FavoriteMovie>? FavoriteMovies { get; set; }
 
-    public User(string userName, string passwordHash, string email, DateTime birthDate, Gender gender, string name,
-        Role role) {
-        Id = Guid.NewGuid();
-        UserName = userName;
-        PasswordHash = passwordHash;
-        Email = email;
-        BirthDate = birthDate;
-        Gender = gender;
-        Name = name;
-        Role = role;
-    }
-
     public User(Guid id) {
         Id = id;
         Name = "";

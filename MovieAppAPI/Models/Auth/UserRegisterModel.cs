@@ -4,6 +4,7 @@ using MovieAppAPI.Entities.Users;
 
 namespace MovieAppAPI.Models.Auth;
 
+// TODO: ModelState.IsValid - ???
 public class UserRegisterModel {
     private const byte MinPasswordLength = 6;
 

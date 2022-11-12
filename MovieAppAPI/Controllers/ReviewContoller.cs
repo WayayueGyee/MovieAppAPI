@@ -75,6 +75,7 @@ public class ReviewController : ControllerExtractToken {
     }
 
     [HttpPut("/api/review/{id:guid}")]
+    [Authorize("TokenNotRejected")]
     public async Task<IActionResult> UpdateReview(Guid id, ReviewUpdateModel reviewUpdateModel) {
         try {
             await _reviewService.Update(id, reviewUpdateModel);
@@ -91,7 +92,7 @@ public class ReviewController : ControllerExtractToken {
     }
 
     [HttpPut("{movieId:guid}/review/{id:guid}/edit")]
-    [Authorize]
+    [Authorize("TokenNotRejected")]
     public async Task<IActionResult> UpdateReviewByMovieIdAndReviewId(Guid movieId, Guid id,
         ReviewUpdateModel reviewUpdateModel) {
         try {
@@ -110,6 +111,7 @@ public class ReviewController : ControllerExtractToken {
     }
 
     [HttpDelete("/api/review/{id:guid}")]
+    [Authorize("TokenNotRejected")]
     public async Task<IActionResult> DeleteReview(Guid id) {
         try {
             await _reviewService.Delete(id);
@@ -122,6 +124,7 @@ public class ReviewController : ControllerExtractToken {
     }
 
     [HttpDelete("{movieId:guid}/review/{id:guid}/delete")]
+    [Authorize("TokenNotRejected")]
     public async Task<IActionResult> DeleteReviewByMovieIdAndReviewId(Guid movieId, Guid id) {
         try {
             await _reviewService.Delete(movieId, id);

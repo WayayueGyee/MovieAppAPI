@@ -22,21 +22,6 @@ namespace MovieAppAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("GenreMovie", b =>
-                {
-                    b.Property<Guid>("GenresId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("MoviesId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("GenresId", "MoviesId");
-
-                    b.HasIndex("MoviesId");
-
-                    b.ToTable("GenreMovie", (string)null);
-                });
-
             modelBuilder.Entity("MovieAppAPI.Entities.Auth.InvalidToken", b =>
                 {
                     b.Property<int>("Id")
@@ -51,7 +36,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("invalid_token", (string)null);
+                    b.ToTable("invalid_token");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Country", b =>
@@ -69,7 +54,7 @@ namespace MovieAppAPI.Migrations
                     b.HasIndex("CountryName")
                         .IsUnique();
 
-                    b.ToTable("country", (string)null);
+                    b.ToTable("country");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.FavoriteMovie", b =>
@@ -84,7 +69,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("favorite_movies", (string)null);
+                    b.ToTable("favorite_movies");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Genre", b =>
@@ -99,7 +84,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("genre", (string)null);
+                    b.ToTable("genre");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Movie", b =>
@@ -145,7 +130,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("movie", (string)null);
+                    b.ToTable("movie");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.MovieGenre", b =>
@@ -160,7 +145,7 @@ namespace MovieAppAPI.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("movie_genre", (string)null);
+                    b.ToTable("movie_genre");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Review", b =>
@@ -184,7 +169,8 @@ namespace MovieAppAPI.Migrations
                     b.Property<string>("ReviewText")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid?>("UserId")
+                        .IsRequired()
                         .HasColumnType("uuid")
                         .HasColumnName("Author");
 
@@ -195,7 +181,7 @@ namespace MovieAppAPI.Migrations
                     b.HasIndex("MovieId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("review", (string)null);
+                    b.ToTable("review");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.Users.User", b =>
@@ -240,22 +226,7 @@ namespace MovieAppAPI.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("user", (string)null);
-                });
-
-            modelBuilder.Entity("GenreMovie", b =>
-                {
-                    b.HasOne("MovieAppAPI.Entities.Genre", null)
-                        .WithMany()
-                        .HasForeignKey("GenresId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MovieAppAPI.Entities.Movie", null)
-                        .WithMany()
-                        .HasForeignKey("MoviesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.ToTable("user");
                 });
 
             modelBuilder.Entity("MovieAppAPI.Entities.FavoriteMovie", b =>

@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MovieAppAPI.Models.Genres;
-using MovieAppAPI.Models.Users;
 
 namespace MovieAppAPI.Entities;
 

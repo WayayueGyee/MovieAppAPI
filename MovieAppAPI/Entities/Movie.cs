@@ -48,7 +48,6 @@ public class Movie {
     public int? Fees { get; set; }
     public int AgeLimit { get; set; }
 
-
     public Guid? CountryId { get; set; }
     public Country? Country { get; set; }
 
