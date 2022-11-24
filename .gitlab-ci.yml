@@ -29,10 +29,6 @@ build-job:       # This job runs in the build stage, which runs first.
     - echo "Current working directory:"
     - pwd
     - ls -l
-    - echo "Creating new dir:"
-    - mkdir build
-    - echo "Dir "build" created"
-    - ls -l
 
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
