@@ -1,48 +1,88 @@
 variables:
   NUGET_PACKAGES_DIR: '~/.nuget'
-  SOURCE_CODE_PATH: './MovieAppAPI'
-  DATABASE_FILL_PATH: './DatabaseFill'
-  DEBUG_BUILD_DLL: './MovieAppAPI/bin/Debug/net6.0/MovieAppAPI.dll'
-  RELEASE_BUILD_DLL: './MovieAppAPI/bin/Release/net6.0/MovieAppAPI.dll'
 
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
   - deploy
 
-build-app-job:       # This job runs in the build stage, which runs first.
-  stage: build
+.build:
+  variables:
+    SOURCE_CODE_PATH: .
+    RELEASE_BUILD_DIR: $SOURCE_CODE_PATH/bin/Release/net6.0
+    DEBUG_BUILD_DIR: $SOURCE_CODE_PATH/bin/Debug/net6.0
+    BINARY_NAME: SomeDll.dll
   image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
   tags:
     - build
   script:
-    - echo "Building the project"
+    - echo "Building the app with job $CI_JOB_NAME"
     - dotnet build --configuration Release $SOURCE_CODE_PATH
   artifacts:
-    name: App.dll
+    name: $BINARY_NAME
     paths:
-      - $RELEASE_BUILD_DLL
+      - $RELEASE_BUILD_DIR/$BINARY_NAME
     expire_in: 30 mins
 
-movie-proj-unit-test-job:   # This job runs in the test stage.
+.build-app-vars:
+  variables:
+    SOURCE_CODE_PATH: ./MovieAppAPI
+    BINARY_NAME: MovieAppAPI.dll
+
+.build-filler-vars:
+  variables:
+    SOURCE_CODE_PATH: ./DatabaseFill
+    BINARY_NAME: DatabaseFill.dll
+
+
+build-app-job:       # This job runs in the build stage, which runs first.
+  stage: build
+  extends:
+    - .build
+    - .build-app-vars
+  script: 
+    - echo "$SOURCE_CODE_PATH"
+    - echo "$RELEASE_BUILD_DIR"
+
+build-filler-job:
+  stage: build
+  extends:
+    - .build
+    - .build-filler-vars
+  script:
+    - dotnet build --configuration Release $SOURCE_CODE_PATH
+  artifacts:
+    # name: $BINARY_NAME
+    paths:
+      - $RELEASE_BUILD_DIR/$BINARY_NAME
+    # expire_in: 30 mins
+
+movie-app-unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
   tags: 
     - test
   script:
-    - dotnet test
-    - echo "Running unit tests... This will take about 2 seconds."
-    - sleep 2
-    - echo "Code coverage is 90%"
+    - echo "Running unit tests for app..."
+    - dotnet test $APP_SOURCE_CODE_PATH --no-restore # Or --no-build I don't know yet
+
+filler-unit-test-job:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
+  tags:
+    - test
+  script:
+    - echo "Running unit tests for database filler..."
+    - dotnet test $FILLER_SOURCE_CODE_PATH --no-restore
 
 lint-test-job:   # This job also runs in the test stage.
   stage: test    # It can run at the same time as unit-test-job (in parallel).
   image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
-  tags: 
+  tags:
     - test
   script:
-    - echo "Linting code... This will take about 1 seconds."
-    - sleep 1
+    - echo "Linting code... This will take about 10 seconds."
+    - sleep 10
     - echo "No lint issues found."
 
 deploy-job:      # This job runs in the deploy stage.
