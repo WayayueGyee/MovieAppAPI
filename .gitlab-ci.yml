@@ -14,12 +14,12 @@ build-app-job:       # This job runs in the build stage, which runs first.
     - build
   script:
     - echo "Building the project"
-    # - dotnet build $SOURCE_CODE_PATH
+    - dotnet build $SOURCE_CODE_PATH
+    # - echo "Project working dir:" && pwd
+    # - echo "Working dir files:" && ls -a
   artifacts:
     paths:
       - ./bin/Debug/net6.0/MovieAppAPI.dll
-    # - echo "Project working dir:" && pwd
-    # - echo "Working dir files:" && ls -a
 
 movie-proj-unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
