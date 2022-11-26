@@ -17,6 +17,7 @@ build-app-job:       # This job runs in the build stage, which runs first.
     - echo "Building the project"
     - dotnet clean $DATABASE_FILL_PATH
     - dotnet build $SOURCE_CODE_PATH
+    - find | grep -P "bin.*MovieAppAPI.dll"
     # - echo "Project working dir:" && pwd
     # - echo "Working dir files:" && ls -a
   artifacts:
