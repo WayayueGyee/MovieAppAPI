@@ -20,7 +20,7 @@ build-app-job:       # This job runs in the build stage, which runs first.
     # - echo "Working dir files:" && ls -a
   artifacts:
     paths:
-      - ./bin/Debug/net6.0/MovieAppAPI.dll
+      - $DEBUG_BUILD_DLL
 
 movie-proj-unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
