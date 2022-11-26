@@ -19,7 +19,7 @@ stages:          # List of stages for jobs, and their order of execution
     - echo "Building the app with job $CI_JOB_NAME"
     - dotnet build --configuration Release $SOURCE_CODE_PATH
   artifacts:
-    name: $BINARY_NAME
+    name: пососи
     paths:
       - $RELEASE_BUILD_DIR/$BINARY_NAME
     expire_in: 30 mins
@@ -40,9 +40,6 @@ build-app-job:       # This job runs in the build stage, which runs first.
   extends:
     - .build
     - .build-app-vars
-  script: 
-    - echo "$SOURCE_CODE_PATH"
-    - echo "$RELEASE_BUILD_DIR"
 
 build-filler-job:
   stage: build
@@ -50,6 +47,7 @@ build-filler-job:
     - .build
     - .build-filler-vars
   script:
+    - echo "Building the app with job $CI_JOB_NAME"
     - dotnet build --configuration Release $SOURCE_CODE_PATH
   artifacts:
     # name: $BINARY_NAME
