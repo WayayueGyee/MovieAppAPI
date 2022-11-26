@@ -2,7 +2,7 @@ variables:
   NUGET_PACKAGES_DIR: '~/.nuget'
   SOURCE_CODE_PATH: './MovieAppAPI'
   DATABASE_FILL_PATH: './DatabaseFill'
-  DEBUG_BUILD_DLL: './bin/Debug/net6.0/MovieAppAPI.dll'
+  DEBUG_BUILD_DLL: './MovieAppAPI/bin/Debug/net6.0/MovieAppAPI.dll'
 
 stages:          # List of stages for jobs, and their order of execution
   - build
@@ -15,9 +15,7 @@ build-app-job:       # This job runs in the build stage, which runs first.
     - build
   script:
     - echo "Building the project"
-    - dotnet clean $DATABASE_FILL_PATH
     - dotnet build $SOURCE_CODE_PATH
-    - find | grep -P "bin.*MovieAppAPI.dll"
     # - echo "Project working dir:" && pwd
     # - echo "Working dir files:" && ls -a
   artifacts:
