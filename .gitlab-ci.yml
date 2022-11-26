@@ -19,6 +19,7 @@ build-app-job:       # This job runs in the build stage, which runs first.
     # - echo "Project working dir:" && pwd
     # - echo "Working dir files:" && ls -a
   artifacts:
+    name: App.dll
     paths:
       - $DEBUG_BUILD_DLL
 
