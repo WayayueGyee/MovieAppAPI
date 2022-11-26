@@ -1,19 +1,23 @@
 variables:
   NUGET_PACKAGES_DIR: '~/.nuget'
   SOURCE_CODE_PATH: './MovieAppAPI'
+  DEBUG_BUILD_DLL: './bin/Debug/net6.0/MovieAppAPI.dll'
 
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
   - deploy
 
-build-job:       # This job runs in the build stage, which runs first.
+build-app-job:       # This job runs in the build stage, which runs first.
   stage: build
   tags:
     - build
   script:
     - echo "Building the project"
-    - dotnet build $SOURCE_CODE_PATH
+    # - dotnet build $SOURCE_CODE_PATH
+  artifacts:
+    paths:
+      - ./bin/Debug/net6.0/MovieAppAPI.dll
     # - echo "Project working dir:" && pwd
     # - echo "Working dir files:" && ls -a
 
