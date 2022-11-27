@@ -79,7 +79,7 @@ build-filler-job:
 # ------------TEST_START------------
 movie-app-unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
-  image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
+  # image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
   extends:
     - .app-vars
   tags: 
@@ -90,7 +90,7 @@ movie-app-unit-test-job:   # This job runs in the test stage.
 
 filler-unit-test-job:
   stage: test
-  image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
+  # image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
   extends:
     - .filler-vars
   tags:
