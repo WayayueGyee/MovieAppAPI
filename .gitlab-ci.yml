@@ -4,6 +4,10 @@ stages:          # List of stages for jobs, and their order of execution
   - deploy
 
 # ------------GENERAL_TEMPLATES_START------------
+.app-vars:
+  variables:
+    SOURCE_CODE_PATH: ./MovieAppAPI
+
 .filler-vars:
   variables:
     SOURCE_CODE_PATH: ./DatabaseFill
