@@ -10,11 +10,11 @@ services:
     expose:
       - 80
     networks: 
-      - cool-app
+      - movie-api
     restart: always
   db:
     hostname: database_host
-    image: postgres:latest
+    image: postgres:15.1
     environment:
       POSTGRES_DB: "movie_service"
       POSTGRES_USER: "root"
@@ -25,7 +25,7 @@ services:
     expose:
       - 5432
     networks:
-      - cool-app
+      - movie-api
     restart: always
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U root -d movie_service" ]
@@ -37,6 +37,6 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 10
-#322 7405
+
 networks:
-  cool-app:
+  movie-api:

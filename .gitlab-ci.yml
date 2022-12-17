@@ -1,6 +1,3 @@
-variables:
-  NUGET_PACKAGES_DIR: '~/.nuget'
-
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
@@ -17,29 +14,44 @@ stages:          # List of stages for jobs, and their order of execution
 # ------------GENERAL_TEMPLATES_END------------
 
 # ------------BUILD_TEMPLATES_START------------
-.build:
+.docker-dotnet-build:
+  variables:
+    VERSION_TAG: v1.0.0
+    LATEST_TAG: latest
+    IMAGE_NAME_VERSION: vladovello/dotnet-movie-app-api:$VERSION_TAG
+    IMAGE_NAME_LATEST: vladovello/dotnet-movie-app-api:$LATEST_TAG
+    BINARY_NAME: SomeDll.dll
+  tags:
+    - build
+  before_script:
+    - docker login -u $REGISTRY_LOGIN -p $REGISTRY_PASSWORD
+  script:
+    - echo "Building the app with job $CI_JOB_NAME"
+    - docker compose build -t $IMAGE_NAME_LATEST -t $IMAGE_NAME_VERSION .
+    - docker push $IMAGE_NAME_LATEST
+    - docker push $IMAGE_NAME_VERSION
+    - docker compose cp app:/app/$BINARY_NAME .
+  artifacts:
+    name: $BINARY_NAME
+    paths:
+      - $BINARY_NAME
+    expire_in: 30 mins
+  
+.dotnet-build:
   variables:
     SOURCE_CODE_PATH: .
-    RELEASE_BUILD_DIR: $SOURCE_CODE_PATH/bin/Release/net6.0
-    DEBUG_BUILD_DIR: $SOURCE_CODE_PATH/bin/Debug/net6.0
+    BUILD_DIR: $SOURCE_CODE_PATH/bin/Release/net6.0
     BINARY_NAME: SomeDll.dll
-  image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
   tags:
     - build
   script:
     - echo "Building the app with job $CI_JOB_NAME"
-    - dotnet build --configuration Release $SOURCE_CODE_PATH
+    - dotnet build $SOURCE_CODE_PATH -c Release -o $BUILD_DIR
   artifacts:
     name: $BINARY_NAME
     paths:
-      - $RELEASE_BUILD_DIR/$BINARY_NAME
+      - $BUILD_DIR/$BINARY_NAME
     expire_in: 30 mins
-
-.build-app-vars:
-  extends:
-    - .app-vars
-  variables:
-    BINARY_NAME: MovieAppAPI.dll
 
 .build-filler-vars:
   extends:
@@ -51,27 +63,26 @@ stages:          # List of stages for jobs, and their order of execution
 # ------------BUILD_START------------
 build-app-job:       # This job runs in the build stage, which runs first.
   stage: build
+  variables:
+    BINARY_NAME: MovieAppAPI.dll
   extends:
-    - .build
-    - .build-app-vars
+    - .docker-dotnet-build
 
 build-filler-job:
+  # image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
   stage: build
   extends:
-    - .build
+    - .dotnet-build
     - .build-filler-vars
   script:
     - echo "Building the app with job $CI_JOB_NAME"
-    - dotnet build --configuration Debug $SOURCE_CODE_PATH
-  artifacts:
-    paths:
-      - $DEBUG_BUILD_DIR/$BINARY_NAME
+    - dotnet build --configuration Release $SOURCE_CODE_PATH
 # ------------BUILD_END------------
 
 # ------------TEST_START------------
 movie-app-unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
-  image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
+  # image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
   extends:
     - .app-vars
   tags: 
@@ -82,7 +93,7 @@ movie-app-unit-test-job:   # This job runs in the test stage.
 
 filler-unit-test-job:
   stage: test
-  image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
+  # image: mcr.microsoft.com/dotnet/sdk:6.0-alpine-amd64
   extends:
     - .filler-vars
   tags:
